@@ -133,8 +133,8 @@ VoxStream is a Java-based application with a Java frontend and backend that inte
 > NOTE: Composite validation now enforces TTS purge interval >= Event purge interval. Future rules will extend this module as new interdependent keys arrive.
 
 **Testing Phase 2:**
-- [ ] Test event bus performance with high volume
-- [ ] Verify event cleanup works correctly
+- [x] Test event bus performance with high volume
+- [x] Verify event cleanup works correctly
 - [x] Test database operations and migrations (baseline covered by existing tests)
 - [x] Validate configuration persistence (covered indirectly by profile & validator tests)
 - [x] Test settings UI functionality (manual)

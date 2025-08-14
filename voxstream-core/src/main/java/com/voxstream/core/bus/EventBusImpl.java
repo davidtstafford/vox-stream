@@ -212,6 +212,13 @@ public class EventBusImpl implements EventBus, DisposableBean {
         }
     }
 
+    // Visible for testing: trigger maintenance cycle immediately without waiting
+    // for
+    // the scheduled interval.
+    void maintenanceTick() {
+        purgeTask();
+    }
+
     @Override
     public void destroy() {
         running.set(false);
