@@ -99,12 +99,12 @@ VoxStream is a Java-based application with a Java frontend and backend that inte
 > NOTE: Persistence will be fully implemented after database schema (Phase 2.2). Additional platform-specific event subclasses will be added during Phase 3.
 
 ### 2.2 Database Layer
-- [ ] Setup embedded database (H2 or SQLite)
-- [ ] Create database schema for events
+- [x] Setup embedded database (H2 or SQLite)
+- [x] Create database schema for events
 - [ ] Create database schema for viewers
 - [ ] Create database schema for configuration
 - [ ] Implement DAO pattern for data access
-- [ ] Add database migration system
+- [x] Add database migration system
 - [ ] Implement data backup and restore
 
 ### 2.3 Configuration Management

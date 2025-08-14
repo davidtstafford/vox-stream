@@ -17,17 +17,24 @@ public class BaseEvent implements Event {
     private final EventMetadata metadata;
 
     public BaseEvent(EventType type, String sourcePlatform, Map<String, Object> payload, EventMetadata metadata) {
-        this(Event.newId(), type, sourcePlatform, payload, metadata);
+        this(Event.newId(), type, Instant.now(), sourcePlatform, payload, metadata);
     }
 
-    public BaseEvent(String id, EventType type, String sourcePlatform, Map<String, Object> payload,
+    // Added constructor allowing explicit timestamp (used for persistence rehydration)
+    public BaseEvent(String id, EventType type, Instant timestamp, String sourcePlatform, Map<String, Object> payload,
             EventMetadata metadata) {
         this.id = Objects.requireNonNull(id);
         this.type = Objects.requireNonNull(type);
-        this.timestamp = Instant.now();
+        this.timestamp = Objects.requireNonNull(timestamp);
         this.sourcePlatform = Objects.requireNonNull(sourcePlatform);
         this.payload = payload != null ? Collections.unmodifiableMap(payload) : Collections.emptyMap();
         this.metadata = metadata;
+    }
+
+    // Legacy constructor retained for backward compatibility (timestamp = now)
+    public BaseEvent(String id, EventType type, String sourcePlatform, Map<String, Object> payload,
+            EventMetadata metadata) {
+        this(id, type, Instant.now(), sourcePlatform, payload, metadata);
     }
 
     @Override
