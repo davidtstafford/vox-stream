@@ -32,8 +32,13 @@ public class EventMetrics {
         dropped.incrementAndGet();
     }
 
-    public void incPersistenceSuccess() { persistenceSuccess.incrementAndGet(); }
-    public void incPersistenceFailure() { persistenceFailure.incrementAndGet(); }
+    public void incPersistenceSuccess() {
+        persistenceSuccess.incrementAndGet();
+    }
+
+    public void incPersistenceFailure() {
+        persistenceFailure.incrementAndGet();
+    }
 
     public long getPublished() {
         return published.get();
@@ -51,8 +56,13 @@ public class EventMetrics {
         return dropped.get();
     }
 
-    public long getPersistenceSuccess() { return persistenceSuccess.get(); }
-    public long getPersistenceFailure() { return persistenceFailure.get(); }
+    public long getPersistenceSuccess() {
+        return persistenceSuccess.get();
+    }
+
+    public long getPersistenceFailure() {
+        return persistenceFailure.get();
+    }
 
     public double getAvgDispatchMicros() {
         long d = delivered.get();
