@@ -46,6 +46,9 @@ public final class ConfigValidators {
         // Jitter percent 0.0 - 0.5
         register(CoreConfigKeys.PLATFORM_RECONNECT_JITTER_PERCENT, v -> v >= 0.0 && v <= 0.5,
                 (k, v) -> fail(k, "must be between 0.0 and 0.5"));
+        // Backoff reset threshold 10s - 1h (ensure reasonable)
+        register(CoreConfigKeys.PLATFORM_RECONNECT_RESET_AFTER_STABLE_MS, v -> v >= 10_000 && v <= 3_600_000,
+                (k, v) -> fail(k, "must be between 10000 and 3600000 ms"));
     }
 
     private ConfigValidators() {

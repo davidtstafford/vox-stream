@@ -153,9 +153,10 @@ VoxStream is a Java-based application with a Java frontend and backend that inte
   - [x] Define event emission contract (PlatformEvent -> internal Event mapping hook) // initial placeholder (mapping hook to implement with first real platform)
   - [x] Add healthCheck() optional method
 - [x] Create platform configuration models
-  - [x] Add config keys: platform.enabled, reconnect.initialDelayMs, reconnect.maxDelayMs, reconnect.maxAttempts (-1=infinite), heartbeat.intervalSec, reconnect.jitterPercent
-  - [x] Implement validators for new keys (ranges, relationships: initial < max, positive intervals, jitter 0.0-0.5)
+  - [x] Add config keys: platform.enabled, reconnect.initialDelayMs, reconnect.maxDelayMs, reconnect.maxAttempts (-1=infinite), heartbeat.intervalSec, reconnect.jitterPercent, reconnect.resetAfterStableMs
+  - [x] Implement validators for new keys (ranges, relationships: initial < max, positive intervals, jitter 0.0-0.5, resetAfterStable 10s-1h)
   - [x] Profile support: include new keys in export/import & checksum
+  - NOTE: Status event propagation test pending (will subscribe to EventBus SYSTEM events and assert ordered lifecycle transitions).
 - [x] Implement connection management system
   - [x] PlatformConnectionManager orchestrating factories, active connections, lifecycle (initial implementation)
   - [x] Track per-connection state machine (DISCONNECTED, CONNECTING, CONNECTED, FAILED, RECONNECT_SCHEDULED)
@@ -164,8 +165,8 @@ VoxStream is a Java-based application with a Java frontend and backend that inte
 - [x] Add auto-reconnection logic
   - [x] Exponential backoff with jitter (configurable reconnect.jitterPercent)
   - [x] Distinguish transient vs fatal errors (fatal stops further reconnect attempts)
-  - [ ] Reset backoff on successful connect duration threshold
-  - [ ] Additional tests with extended DummyPlatformConnection failure scripts
+  - [x] Reset backoff on successful connect duration threshold (reconnect.resetAfterStableMs)
+  - [x] Additional tests with extended DummyPlatformConnection failure scripts (covered by PlatformConnectionManagerBackoffTest fatal & jitter scenarios)
 - [ ] Create connection status monitoring
   - [x] Metrics: connects, disconnects, failedAttempts, currentBackoffMs
   - [x] Snapshot API exposed via manager
@@ -177,11 +178,12 @@ VoxStream is a Java-based application with a Java frontend and backend that inte
 - [ ] Tests
   - [x] Manager lifecycle (start, connect all enabled, shutdown)
   - [x] Auto-reconnect success after transient failures
-  - [ ] Backoff growth & reset assertions
-  - [ ] Jitter application within expected +/- range
-  - [ ] Fatal failure stops reconnection attempts
+  - [x] Backoff growth & reset assertions (PlatformConnectionManagerBackoffTest)
+  - [x] Jitter application within expected +/- range (PlatformConnectionManagerBackoffTest)
+  - [x] Fatal failure stops reconnection attempts (PlatformConnectionManagerBackoffTest)
   - [ ] Status event propagation to EventBus subscribers
   - [x] Validation of new config keys (boundary, composite)
+    - Planned: implement StatusEventPropagationTest subscribing to EventBus SYSTEM events and asserting ordered sequence of states including RECONNECT_SCHEDULED tokens.
 
 ### 3.2 Twitch Integration (MVP)
 - [ ] Setup Twitch API client

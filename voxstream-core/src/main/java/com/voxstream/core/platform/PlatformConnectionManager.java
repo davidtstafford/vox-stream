@@ -98,7 +98,7 @@ public class PlatformConnectionManager {
                 long now = Instant.now().toEpochMilli();
                 state.lastSuccessfulConnectEpochMs = now;
                 updateStatus(state, PlatformStatus.connected(now));
-                state.resetBackoff();
+                scheduleBackoffResetIfStable(state); // defer reset until stable period elapsed
             } else {
                 state.metrics.failedAttempts++;
                 String msg = ex != null ? ex.getMessage() : "failed";
@@ -143,6 +143,25 @@ public class PlatformConnectionManager {
                 TimeUnit.MILLISECONDS);
     }
 
+    private void scheduleBackoffResetIfStable(ConnState state) {
+        int thresholdMs = config.get(CoreConfigKeys.PLATFORM_RECONNECT_RESET_AFTER_STABLE_MS);
+        if (thresholdMs <= 0)
+            return;
+        int currentBackoffAtConnect = state.metrics.currentBackoffMs; // capture value
+        if (currentBackoffAtConnect == 0)
+            return; // nothing to reset
+        scheduler.schedule(() -> {
+            // Only reset if still connected & backoff unchanged & service running
+            if (!started.get())
+                return;
+            if (state.connection.isConnected() && state.metrics.currentBackoffMs == currentBackoffAtConnect) {
+                log.info("[{}] Stable connection for {}ms -> resetting backoff (was {}ms)",
+                        state.connection.platformId(), thresholdMs, currentBackoffAtConnect);
+                state.resetBackoff();
+            }
+        }, thresholdMs, TimeUnit.MILLISECONDS);
+    }
+
     private void updateStatus(ConnState state, PlatformStatus newStatus) {
         state.lastStatus = newStatus;
         // publish system status change event
@@ -158,7 +177,8 @@ public class PlatformConnectionManager {
                     "state", status.state().name(),
                     "detail", status.detail(),
                     "connectedSince", status.connectedSinceEpochMs(),
-                    "lastSuccessful", lastOk);
+                    "lastSuccessful", lastOk,
+                    "fatal", status.fatal());
             eventBus.publish(new BaseEvent(EventType.SYSTEM, platformId, payload, null));
         } catch (Exception e) {
             log.warn("Failed to publish status event for {}: {}", platformId, e.getMessage());
@@ -199,6 +219,6 @@ public class PlatformConnectionManager {
         public long connects;
         public long disconnects;
         public long failedAttempts;
-        public int currentBackoffMs;
+        public volatile int currentBackoffMs; // volatile for cross-thread visibility (tests read async)
     }
 }

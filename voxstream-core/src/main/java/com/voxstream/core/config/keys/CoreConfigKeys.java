@@ -79,6 +79,11 @@ public final class CoreConfigKeys {
             "platform.reconnect.jitterPercent", Double.class, 0.2d, false,
             "Jitter percentage (0.0-0.5) applied to reconnect backoff delays");
 
+    // Reset backoff after being stably connected for at least this many ms
+    public static final ConfigKey<Integer> PLATFORM_RECONNECT_RESET_AFTER_STABLE_MS = new ConfigKey<>(
+            "platform.reconnect.resetAfterStableMs", Integer.class, 120_000, false,
+            "Reset accumulated reconnect backoff after stable connection duration (ms)");
+
     // Registry of all keys for iteration / import-export (order preserved)
     private static final Map<String, ConfigKey<?>> REGISTRY;
     public static final List<ConfigKey<?>> ALL;
@@ -102,6 +107,7 @@ public final class CoreConfigKeys {
         register(m, PLATFORM_RECONNECT_MAX_ATTEMPTS);
         register(m, PLATFORM_HEARTBEAT_INTERVAL_SEC);
         register(m, PLATFORM_RECONNECT_JITTER_PERCENT);
+        register(m, PLATFORM_RECONNECT_RESET_AFTER_STABLE_MS);
         REGISTRY = Collections.unmodifiableMap(m);
         ALL = List.copyOf(REGISTRY.values());
     }
