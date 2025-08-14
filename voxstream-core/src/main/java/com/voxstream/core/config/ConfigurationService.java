@@ -1,6 +1,7 @@
 package com.voxstream.core.config;
 
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -47,6 +48,34 @@ public class ConfigurationService {
         set(key, key.getDefaultValue());
     }
 
+    // Batch update with composite validation
+    public void setAll(Map<ConfigKey<?>, Object> values) {
+        // First run individual validation
+        for (Map.Entry<ConfigKey<?>, Object> e : values.entrySet()) {
+            @SuppressWarnings("unchecked")
+            ConfigKey<Object> k = (ConfigKey<Object>) e.getKey();
+            validate(k, e.getValue());
+        }
+        // Build snapshot map for composite validation
+        Map<ConfigKey<?>, Object> snapshot = new HashMap<>();
+        // Include existing cached plus new values (new takes precedence)
+        for (var key : CoreConfigKeys.ALL) {
+            Object val = values.entrySet().stream().filter(en -> en.getKey() == key).map(Map.Entry::getValue)
+                    .findFirst().orElse(getUnchecked(key));
+            snapshot.put(key, val);
+        }
+        ConfigValidators.validateComposite(snapshot);
+        // If all good persist
+        for (Map.Entry<ConfigKey<?>, Object> e : values.entrySet()) {
+            dao.put(e.getKey().getName(), serialize(e.getValue()));
+            cache.put(e.getKey().getName(), e.getValue());
+        }
+    }
+
+    private Object getUnchecked(ConfigKey<?> key) {
+        return cache.computeIfAbsent(key.getName(), n -> loadOrDefaultUnchecked(key));
+    }
+
     private <T> Object loadOrDefault(ConfigKey<T> key) {
         Optional<String> stored = dao.get(key.getName());
         if (stored.isPresent()) {
@@ -59,16 +88,32 @@ public class ConfigurationService {
         return key.getDefaultValue();
     }
 
-    private <T> void validate(ConfigKey<T> key, T value) {
+    private Object loadOrDefaultUnchecked(ConfigKey<?> key) {
+        Optional<String> stored = dao.get(key.getName());
+        if (stored.isPresent()) {
+            try {
+                return deserialize(stored.get(), key.getType());
+            } catch (Exception e) {
+                log.warn("Failed to parse config {} reverting to default: {}", key.getName(), e.getMessage());
+            }
+        }
+        return key.getDefaultValue();
+    }
+
+    private <T> void validate(ConfigKey<T> key, Object value) {
         // Basic null & type checks
         if (value == null)
             throw new IllegalArgumentException("Value for " + key.getName() + " cannot be null");
+        if (!key.getType().isInstance(value))
+            throw new IllegalArgumentException("Incorrect type for " + key.getName());
         if (value instanceof Number) {
             if (((Number) value).longValue() < 0)
                 throw new IllegalArgumentException("Negative value for " + key.getName());
         }
         // Extended validation
-        ConfigValidators.validate(key, value);
+        @SuppressWarnings("unchecked")
+        ConfigKey<T> cast = (ConfigKey<T>) key;
+        ConfigValidators.validate(cast, cast.getType().cast(value));
     }
 
     private String serialize(Object v) {

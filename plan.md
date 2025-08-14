@@ -123,11 +123,11 @@ VoxStream is a Java-based application with a Java frontend and backend that inte
 - [x] Create settings import/export
 - [ ] Add settings validation and defaults
   - [x] Add numeric range validators (purge intervals, max events, port)
-  - [ ] Implement composite validation (cross-field, dependency rules)
+  - [x] Implement composite validation (cross-field, dependency rules)
   - [ ] Add default profile management (save/restore named profiles)
   - [x] Persist last successful export hash for change detection
 
-> NOTE: Purge interval settings backed by CoreConfigKeys; UI implemented with basic validation (range checks) and import/export JSON support. Validator framework added (numeric ranges). Remaining work: composite validation & default profile management. Export hash now stored in config.lastExportHash and compared to live settings to surface change indicator.
+> NOTE: Purge interval settings backed by CoreConfigKeys; UI implemented with basic validation (range checks) and import/export JSON support. Validator framework added (numeric ranges). Composite validation added (batch setAll with placeholder rules + reserved port rule). Remaining work: default profile management.
 
 **Testing Phase 2:**
 - [ ] Test event bus performance with high volume

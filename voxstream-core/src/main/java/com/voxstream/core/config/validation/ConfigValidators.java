@@ -2,6 +2,7 @@ package com.voxstream.core.config.validation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
@@ -11,7 +12,7 @@ import com.voxstream.core.config.keys.CoreConfigKeys;
 /**
  * Central registry for configuration value validators.
  * Lightweight (no external libs) and executed inside
- * ConfigurationService.set().
+ * ConfigurationService.set()/batch update.
  */
 public final class ConfigValidators {
 
@@ -50,6 +51,12 @@ public final class ConfigValidators {
                 return; // only first matching key
             }
         }
+    }
+
+    // Composite validation executed after a batch update (see
+    // CompositeConfigValidators)
+    public static void validateComposite(Map<ConfigKey<?>, Object> allValues) {
+        CompositeConfigValidators.validate(allValues);
     }
 
     private static void fail(ConfigKey<?> key, String msg) {

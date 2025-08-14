@@ -22,6 +22,11 @@ public final class CoreConfigKeys {
             "config.lastExportHash", String.class, "", false,
             "Hash of last exported settings snapshot (managed internally)");
 
+    // Default profile name to auto-apply on startup (blank = none)
+    public static final ConfigKey<String> DEFAULT_PROFILE_NAME = new ConfigKey<>(
+            "config.profile.defaultName", String.class, "", false,
+            "Name of profile auto-applied at startup");
+
     // Event bus related
     public static final ConfigKey<Integer> EVENT_BUS_MAX_EVENTS = new ConfigKey<>(
             "event.bus.maxEvents", Integer.class, 10000, false, "Maximum buffered in-memory events");
@@ -55,6 +60,7 @@ public final class CoreConfigKeys {
         Map<String, ConfigKey<?>> m = new LinkedHashMap<>();
         register(m, CONFIG_SCHEMA_VERSION);
         register(m, LAST_EXPORT_HASH);
+        register(m, DEFAULT_PROFILE_NAME);
         register(m, EVENT_BUS_MAX_EVENTS);
         register(m, EVENT_BUS_PURGE_INTERVAL_MIN);
         register(m, TTS_ENABLED);
