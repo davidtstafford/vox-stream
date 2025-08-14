@@ -15,12 +15,14 @@ CREATE INDEX IF NOT EXISTS idx_events_created_at ON events(created_at);
 CREATE INDEX IF NOT EXISTS idx_events_type ON events(type);
 CREATE INDEX IF NOT EXISTS idx_events_corr ON events(correlation_id);
 
--- Viewer schema placeholder
+-- Viewer schema
 CREATE TABLE IF NOT EXISTS viewers (
     id VARCHAR(64) PRIMARY KEY,
     platform VARCHAR(32) NOT NULL,
     handle VARCHAR(128) NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    display_name VARCHAR(128) NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_seen_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_viewers_platform_handle ON viewers(platform, handle);
 

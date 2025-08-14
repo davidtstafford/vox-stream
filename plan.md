@@ -101,9 +101,9 @@ VoxStream is a Java-based application with a Java frontend and backend that inte
 ### 2.2 Database Layer
 - [x] Setup embedded database (H2 or SQLite)
 - [x] Create database schema for events
-- [ ] Create database schema for viewers
-- [ ] Create database schema for configuration
-- [ ] Implement DAO pattern for data access
+- [x] Create database schema for viewers
+- [x] Create database schema for configuration
+- [x] Implement DAO pattern for data access
 - [x] Add database migration system
 - [ ] Implement data backup and restore
 
