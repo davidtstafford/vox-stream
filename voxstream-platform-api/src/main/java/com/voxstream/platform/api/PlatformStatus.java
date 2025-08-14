@@ -1,7 +1,7 @@
 package com.voxstream.platform.api;
 
 /**
- * Simple immutable status snapshot for a platform connection.
+ * Immutable status snapshot for a platform connection.
  */
 public record PlatformStatus(
         State state,
@@ -12,7 +12,8 @@ public record PlatformStatus(
         DISCONNECTED,
         CONNECTING,
         CONNECTED,
-        ERROR
+        FAILED,
+        RECONNECT_SCHEDULED
     }
 
     public static PlatformStatus disconnected() {
@@ -23,7 +24,16 @@ public record PlatformStatus(
         return new PlatformStatus(State.CONNECTING, "connecting", 0L);
     }
 
-    public static PlatformStatus error(String message) {
-        return new PlatformStatus(State.ERROR, message, 0L);
+    public static PlatformStatus connected(long sinceEpochMs) {
+        return new PlatformStatus(State.CONNECTED, "connected", sinceEpochMs);
+    }
+
+    public static PlatformStatus failed(String message) {
+        return new PlatformStatus(State.FAILED, message, 0L);
+    }
+
+    public static PlatformStatus reconnectScheduled(long delayMs, int attempt) {
+        return new PlatformStatus(State.RECONNECT_SCHEDULED,
+                "reconnect in " + delayMs + "ms (attempt=" + attempt + ")", 0L);
     }
 }

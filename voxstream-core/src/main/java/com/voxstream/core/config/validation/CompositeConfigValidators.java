@@ -28,6 +28,13 @@ public final class CompositeConfigValidators {
         if (webPort != null && webPort == 65535) {
             throw new IllegalArgumentException("Port 65535 reserved for internal use");
         }
+        // Rule: platform reconnect max delay must be >= initial delay
+        Integer initial = get(values, CoreConfigKeys.PLATFORM_RECONNECT_INITIAL_DELAY_MS, Integer.class);
+        Integer max = get(values, CoreConfigKeys.PLATFORM_RECONNECT_MAX_DELAY_MS, Integer.class);
+        if (initial != null && max != null && max < initial) {
+            throw new IllegalArgumentException(
+                    "platform.reconnect.maxDelayMs must be >= platform.reconnect.initialDelayMs");
+        }
     }
 
     @SuppressWarnings("unchecked")

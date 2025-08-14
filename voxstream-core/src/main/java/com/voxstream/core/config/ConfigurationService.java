@@ -122,7 +122,10 @@ public class ConfigurationService {
         if (!key.getType().isInstance(value))
             throw new IllegalArgumentException("Incorrect type for " + key.getName());
         if (value instanceof Number) {
-            if (((Number) value).longValue() < 0)
+            long lv = ((Number) value).longValue();
+            // Allow -1 for specific sentinel-allowed keys
+            boolean allowNegativeOne = (key == CoreConfigKeys.PLATFORM_RECONNECT_MAX_ATTEMPTS && lv == -1);
+            if (lv < 0 && !allowNegativeOne)
                 throw new IllegalArgumentException("Negative value for " + key.getName());
         }
         // Extended validation

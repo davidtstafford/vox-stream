@@ -52,6 +52,28 @@ public final class CoreConfigKeys {
     public static final ConfigKey<Boolean> WEB_OUTPUT_ENABLE_CORS = new ConfigKey<>(
             "web.cors.enabled", Boolean.class, Boolean.TRUE, false, "Enable CORS for web output");
 
+    // --- Platform connection framework (Phase 3.1) ---
+    // Global enable toggle (future: may add per-platform granular keys)
+    public static final ConfigKey<Boolean> PLATFORM_ENABLED = new ConfigKey<>(
+            "platform.enabled", Boolean.class, Boolean.FALSE, false,
+            "Enable platform connections globally");
+
+    public static final ConfigKey<Integer> PLATFORM_RECONNECT_INITIAL_DELAY_MS = new ConfigKey<>(
+            "platform.reconnect.initialDelayMs", Integer.class, 1000, false,
+            "Initial reconnect backoff delay in milliseconds");
+
+    public static final ConfigKey<Integer> PLATFORM_RECONNECT_MAX_DELAY_MS = new ConfigKey<>(
+            "platform.reconnect.maxDelayMs", Integer.class, 30000, false,
+            "Maximum reconnect backoff delay in milliseconds");
+
+    public static final ConfigKey<Integer> PLATFORM_RECONNECT_MAX_ATTEMPTS = new ConfigKey<>(
+            "platform.reconnect.maxAttempts", Integer.class, -1, false,
+            "Maximum reconnect attempts (-1 = infinite)");
+
+    public static final ConfigKey<Integer> PLATFORM_HEARTBEAT_INTERVAL_SEC = new ConfigKey<>(
+            "platform.heartbeat.intervalSec", Integer.class, 60, false,
+            "Heartbeat / synthetic event emission interval in seconds");
+
     // Registry of all keys for iteration / import-export (order preserved)
     private static final Map<String, ConfigKey<?>> REGISTRY;
     public static final List<ConfigKey<?>> ALL;
@@ -68,6 +90,12 @@ public final class CoreConfigKeys {
         register(m, TTS_BUS_PURGE_INTERVAL_MIN);
         register(m, WEB_OUTPUT_PORT);
         register(m, WEB_OUTPUT_ENABLE_CORS);
+        // Platform keys appended (Phase 3)
+        register(m, PLATFORM_ENABLED);
+        register(m, PLATFORM_RECONNECT_INITIAL_DELAY_MS);
+        register(m, PLATFORM_RECONNECT_MAX_DELAY_MS);
+        register(m, PLATFORM_RECONNECT_MAX_ATTEMPTS);
+        register(m, PLATFORM_HEARTBEAT_INTERVAL_SEC);
         REGISTRY = Collections.unmodifiableMap(m);
         ALL = List.copyOf(REGISTRY.values());
     }

@@ -148,39 +148,87 @@ VoxStream is a Java-based application with a Java frontend and backend that inte
 
 ### 3.1 Platform Connection Framework
 - [ ] Design platform abstraction layer
+  - [ ] Finalize core interfaces (PlatformConnection, PlatformConnectionFactory, PlatformCredential, PlatformStatus enum refinements)
+  - [ ] Add lifecycle methods: connect(), disconnect(), requestReconnect(), isConnected(), getStatus(), addStatusListener()
+  - [ ] Define event emission contract (PlatformEvent -> internal Event mapping hook)
+  - [ ] Add healthCheck() optional method
 - [ ] Create platform configuration models
+  - [x] Add config keys: platform.enabled, reconnect.initialDelayMs, reconnect.maxDelayMs, reconnect.maxAttempts (-1=infinite), heartbeat.intervalSec
+  - [x] Implement validators for new keys (ranges, relationships: initial < max, positive intervals)
+  - [x] Profile support: include new keys in export/import & checksum
 - [ ] Implement connection management system
+  - [ ] PlatformConnectionManager orchestrating factories, active connections, lifecycle
+  - [ ] Track per-connection state machine (DISCONNECTED, CONNECTING, CONNECTED, FAILED, RECONNECT_SCHEDULED)
+  - [ ] Publish state change events onto EventBus (internal System event type extension)
+  - [ ] Persistence of last successful connection timestamp
 - [ ] Add auto-reconnection logic
+  - [ ] Exponential backoff with jitter (configurable caps)
+  - [ ] Distinguish transient vs fatal errors
+  - [ ] Reset backoff on successful connect duration threshold
+  - [ ] Tests with DummyPlatformConnection injecting failures sequence
 - [ ] Create connection status monitoring
+  - [ ] Metrics: connects, disconnects, failedAttempts, currentBackoffMs
+  - [ ] Snapshot API exposed via registry/manager
+  - [ ] Periodic log summary (config flag)
+- [ ] Enhance DummyPlatformConnection for testing
+  - [ ] Simulate connect latency & failure injection script
+  - [ ] Toggle to emit synthetic platform events (chat message heartbeat)
+  - [ ] Expose controllable clock or hooks for tests
+- [ ] Tests
+  - [ ] Manager lifecycle (start, connect all enabled, shutdown)
+  - [ ] Auto-reconnect success after transient failures
+  - [ ] Backoff growth & reset assertions
+  - [ ] Status event propagation to EventBus subscribers
+  - [ ] Validation of new config keys (boundary, composite)
 
 ### 3.2 Twitch Integration (MVP)
 - [ ] Setup Twitch API client
+  - [ ] Choose HTTP/WebSocket libs (Spring WebClient + Jetty WS)
+  - [ ] Create TwitchClient wrapper (REST + EventSub/IRC)
 - [ ] Implement OAuth authentication flow
+  - [ ] Config keys: twitch.clientId, twitch.clientSecret (secure store), twitch.scopes, twitch.redirectPort
+  - [ ] Local loopback auth helper & token persistence (encrypted)
+  - [ ] Token refresh scheduler
 - [ ] Connect to Twitch EventSub or IRC
+  - [ ] Decide initial approach (EventSub WebSocket vs IRC chat) and document
+  - [ ] Implement connection adapter implementing PlatformConnection
 - [ ] Map Twitch events to internal event models
-- [ ] Handle Twitch-specific event types:
+  - [ ] Event mapping table (doc + code)
+  - [ ] Implement converters (subscription, bits, chat, follow, raid, host, channel point)
+- [ ] Handle Twitch-specific event types
   - [ ] Viewer joins/leaves
   - [ ] Subscriptions
-  - [ ] Subscription renewals  
+  - [ ] Subscription renewals
   - [ ] Bit donations
   - [ ] Chat messages
   - [ ] Follows
   - [ ] Raids
   - [ ] Host events
   - [ ] Channel point redemptions
+- [ ] Rate limit / message throttling considerations (placeholder)
+- [ ] Tests
+  - [ ] Mock Twitch API responses (WireMock)
+  - [ ] OAuth token refresh logic
+  - [ ] Event mapping fidelity tests (fixtures -> internal events)
 
 ### 3.3 Connection Management UI
 - [ ] Create connection configuration screen
-- [ ] Add platform selection interface
-- [ ] Implement credential input forms
-- [ ] Add connection status indicators
-- [ ] Create connection testing functionality
-- [ ] Implement sign-out functionality
+  - [ ] Table: Platform | Status | Last Connected | Retries | Actions
+- [ ] Add platform selection interface (combo + add button for future platforms)
+- [ ] Implement credential input forms (dynamic for selected platform)
+- [ ] Add connection status indicators (color/icon bound to status)
+- [ ] Create connection testing functionality (invoke healthCheck())
+- [ ] Implement sign-out functionality (revoke tokens, clear credentials)
+- [ ] Live log panel (filter on connection-related events)
+- [ ] Tests: UI controller unit tests (where feasible) + manual checklist
 
 ### 3.4 Platform Abstraction for Future Expansion
-- [ ] Design interface for additional platforms
+- [ ] Design interface for additional platforms (document required methods & event categories)
 - [ ] Create plugin architecture for new platforms
-- [ ] Document platform integration guide
+  - [ ] SPI: spring-autodiscovery via PlatformConnectionFactory beans in separate module
+  - [ ] Version/compat metadata in factory
+- [ ] Document platform integration guide (steps, required mappings, credential handling)
+- [ ] Example second dummy plugin skeleton (for docs validation)
 
 **Testing Phase 3:**
 - [ ] Test Twitch connection with real account

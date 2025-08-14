@@ -1,9 +1,12 @@
 package com.voxstream.platform.api.dummy;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +25,7 @@ public class DummyPlatformConnection implements PlatformConnection {
     public static final String PLATFORM_ID = "dummy";
 
     private final AtomicReference<PlatformStatus> status = new AtomicReference<>(PlatformStatus.disconnected());
+    private final List<Consumer<PlatformStatus>> listeners = new CopyOnWriteArrayList<>();
     private volatile String sessionId;
 
     @Override
@@ -29,20 +33,19 @@ public class DummyPlatformConnection implements PlatformConnection {
         if (status.get().state() == State.CONNECTED) {
             return CompletableFuture.completedFuture(true);
         }
-        status.set(PlatformStatus.connecting());
+        updateStatus(PlatformStatus.connecting());
         sessionId = UUID.randomUUID().toString();
         log.info("[DummyPlatform] Connecting session {}...", sessionId);
         return CompletableFuture.supplyAsync(() -> {
             try {
                 Thread.sleep(250); // simulate latency
-                PlatformStatus connected = new PlatformStatus(State.CONNECTED, "connected",
-                        Instant.now().toEpochMilli());
-                status.set(connected);
+                PlatformStatus connected = PlatformStatus.connected(Instant.now().toEpochMilli());
+                updateStatus(connected);
                 log.info("[DummyPlatform] Connected session {}", sessionId);
                 return true;
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                status.set(PlatformStatus.error("interrupted"));
+                updateStatus(PlatformStatus.failed("interrupted"));
                 return false;
             }
         });
@@ -55,7 +58,7 @@ public class DummyPlatformConnection implements PlatformConnection {
         }
         return CompletableFuture.runAsync(() -> {
             log.info("[DummyPlatform] Disconnecting session {}", sessionId);
-            status.set(PlatformStatus.disconnected());
+            updateStatus(PlatformStatus.disconnected());
             sessionId = null;
         });
     }
@@ -63,6 +66,22 @@ public class DummyPlatformConnection implements PlatformConnection {
     @Override
     public PlatformStatus status() {
         return status.get();
+    }
+
+    @Override
+    public void addStatusListener(java.util.function.Consumer<PlatformStatus> listener) {
+        listeners.add(listener);
+    }
+
+    private void updateStatus(PlatformStatus newStatus) {
+        status.set(newStatus);
+        listeners.forEach(l -> {
+            try {
+                l.accept(newStatus);
+            } catch (Exception e) {
+                log.warn("Listener error: {}", e.getMessage());
+            }
+        });
     }
 
     @Override

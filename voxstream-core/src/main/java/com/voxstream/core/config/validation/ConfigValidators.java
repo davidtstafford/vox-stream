@@ -31,6 +31,18 @@ public final class ConfigValidators {
         // Web port range
         register(CoreConfigKeys.WEB_OUTPUT_PORT, v -> v >= 1024 && v <= 65535,
                 (k, v) -> fail(k, "must be an unprivileged port 1024-65535"));
+        // Platform reconnect initial delay 100-60000 ms
+        register(CoreConfigKeys.PLATFORM_RECONNECT_INITIAL_DELAY_MS, v -> v >= 100 && v <= 60_000,
+                (k, v) -> fail(k, "must be between 100 and 60000 ms"));
+        // Platform reconnect max delay 100-300000 ms (composite must be >= initial)
+        register(CoreConfigKeys.PLATFORM_RECONNECT_MAX_DELAY_MS, v -> v >= 100 && v <= 300_000,
+                (k, v) -> fail(k, "must be between 100 and 300000 ms"));
+        // Platform max attempts -1 (infinite) or >=1
+        register(CoreConfigKeys.PLATFORM_RECONNECT_MAX_ATTEMPTS, v -> v == -1 || v >= 1,
+                (k, v) -> fail(k, "must be -1 (infinite) or >= 1"));
+        // Heartbeat interval 5-3600 seconds
+        register(CoreConfigKeys.PLATFORM_HEARTBEAT_INTERVAL_SEC, v -> v >= 5 && v <= 3600,
+                (k, v) -> fail(k, "must be between 5 and 3600 seconds"));
     }
 
     private ConfigValidators() {
