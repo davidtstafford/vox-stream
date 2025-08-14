@@ -88,13 +88,15 @@ VoxStream is a Java-based application with a Java frontend and backend that inte
 **Goal**: Build the fundamental systems that other features will depend on
 
 ### 2.1 Event Bus System
-- [ ] Design event bus architecture
-- [ ] Implement core event bus with pub/sub pattern
-- [ ] Create event models for different platforms
-- [ ] Implement event filtering and routing
-- [ ] Add event persistence to local database
-- [ ] Implement event cleanup/purging (10-minute default)
-- [ ] Add event bus monitoring and metrics
+- [x] Design event bus architecture
+- [x] Implement core event bus with pub/sub pattern (in-memory skeleton)
+- [x] Create event models for different platforms (base/general models added)
+- [x] Implement event filtering and routing (basic predicate + priority dispatch)
+- [ ] Add event persistence to local database (stub service only – pending DB layer in 2.2)
+- [x] Implement event cleanup/purging (scheduled purge + max size, expiration support)
+- [x] Add event bus monitoring and metrics (basic counters + snapshot)
+
+> NOTE: Persistence will be fully implemented after database schema (Phase 2.2). Additional platform-specific event subclasses will be added during Phase 3.
 
 ### 2.2 Database Layer
 - [ ] Setup embedded database (H2 or SQLite)

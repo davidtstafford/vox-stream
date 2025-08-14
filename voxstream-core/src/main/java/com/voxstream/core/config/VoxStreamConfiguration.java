@@ -91,6 +91,11 @@ public class VoxStreamConfiguration {
         private int maxEvents = 10000;
         private int purgeIntervalMinutes = 10;
         private boolean enableMetrics = true;
+        // New fields for Phase 2 Event Bus skeleton
+        private Integer bufferSize; // If null, default to maxEvents
+        private int dispatcherThreads = Runtime.getRuntime().availableProcessors();
+        private boolean enablePersistence = false;
+        private String backpressureStrategy = "DROP_OLDEST"; // DROP_OLDEST | DROP_NEW | BLOCK
 
         public int getMaxEvents() {
             return maxEvents;
@@ -114,6 +119,42 @@ public class VoxStreamConfiguration {
 
         public void setEnableMetrics(boolean enableMetrics) {
             this.enableMetrics = enableMetrics;
+        }
+
+        public int getEffectiveBufferSize() {
+            return bufferSize != null ? bufferSize : maxEvents;
+        }
+
+        public Integer getBufferSize() {
+            return bufferSize;
+        }
+
+        public void setBufferSize(Integer bufferSize) {
+            this.bufferSize = bufferSize;
+        }
+
+        public int getDispatcherThreads() {
+            return dispatcherThreads;
+        }
+
+        public void setDispatcherThreads(int dispatcherThreads) {
+            this.dispatcherThreads = dispatcherThreads;
+        }
+
+        public boolean isEnablePersistence() {
+            return enablePersistence;
+        }
+
+        public void setEnablePersistence(boolean enablePersistence) {
+            this.enablePersistence = enablePersistence;
+        }
+
+        public String getBackpressureStrategy() {
+            return backpressureStrategy;
+        }
+
+        public void setBackpressureStrategy(String backpressureStrategy) {
+            this.backpressureStrategy = backpressureStrategy;
         }
     }
 
