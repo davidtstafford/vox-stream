@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import com.voxstream.core.config.ConfigurationService;
 import com.voxstream.core.config.VoxStreamConfiguration;
 import com.voxstream.core.config.keys.CoreConfigKeys;
+import com.voxstream.core.config.profile.ProfileService;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -27,6 +28,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -35,6 +37,7 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
 
@@ -78,11 +81,18 @@ public class MainController implements Initializable {
     private Spinner<Integer> webPortSpinner;
     @FXML
     private CheckBox enableCorsCheckbox;
+    // Profile UI
+    @FXML
+    private ListView<String> profileListView;
+    @FXML
+    private TextField newProfileNameField;
 
     @Autowired
     private VoxStreamConfiguration configuration;
     @Autowired
     private ConfigurationService configurationService;
+    @Autowired
+    private ProfileService profileService;
 
     private String currentExportHashCached = "";
 
@@ -95,6 +105,8 @@ public class MainController implements Initializable {
         setupStatusBar();
         initSettingsControls();
         refreshExportHashCache();
+        refreshProfiles();
+        highlightDefaultProfile();
 
         // Update status
         updateStatus("Application Ready", false);
@@ -163,11 +175,11 @@ public class MainController implements Initializable {
         alert.setTitle("About VoxStream");
         alert.setHeaderText("VoxStream v" + configuration.getVersion());
         alert.setContentText(
-                "VoxStream - Streaming Platform Integration Application\\n\\n" +
-                        "A Java-based application for integrating with streaming platforms,\\n" +
-                        "providing Text-to-Speech capabilities, event management,\\n" +
-                        "and viewer interaction features.\\n\\n" +
-                        "Compatible with macOS Catalina (10.15) and up, Windows 10 and up.\\n\\n" +
+                "VoxStream - Streaming Platform Integration Application\n\n" +
+                        "A Java-based application for integrating with streaming platforms,\n" +
+                        "providing Text-to-Speech capabilities, event management,\n" +
+                        "and viewer interaction features.\n\n" +
+                        "Compatible with macOS Catalina (10.15) and up, Windows 10 and up.\n\n" +
                         "© 2025 VoxStream Project");
         alert.showAndWait();
     }
@@ -303,6 +315,123 @@ public class MainController implements Initializable {
         } catch (Exception ex) {
             logger.error("Import failed", ex);
             updateStatus("Import failed: " + ex.getMessage(), false);
+        }
+    }
+
+    // --- Profile handlers ---
+    @FXML
+    private void handleSaveProfileAs() {
+        String name = newProfileNameField.getText();
+        if (name == null || name.isBlank()) {
+            updateStatus("Enter profile name", false);
+            return;
+        }
+        try {
+            profileService.saveProfile(name.trim());
+            refreshProfiles();
+            selectProfile(name.trim());
+            updateStatus("Profile saved", false);
+        } catch (Exception ex) {
+            logger.warn("Save profile failed: {}", ex.getMessage());
+            updateStatus("Save failed: " + ex.getMessage(), false);
+        }
+    }
+
+    @FXML
+    private void handleApplyProfile() {
+        String sel = profileListView.getSelectionModel().getSelectedItem();
+        if (sel == null) {
+            updateStatus("Select profile", false);
+            return;
+        }
+        try {
+            profileService.applyProfile(sel);
+            initSettingsControls();
+            refreshExportHashCache();
+            updateStatus("Profile applied", false);
+        } catch (Exception ex) {
+            logger.warn("Apply profile failed: {}", ex.getMessage());
+            updateStatus("Apply failed: " + ex.getMessage(), false);
+        }
+    }
+
+    @FXML
+    private void handleDeleteProfile() {
+        String sel = profileListView.getSelectionModel().getSelectedItem();
+        if (sel == null) {
+            updateStatus("Select profile", false);
+            return;
+        }
+        try {
+            profileService.deleteProfile(sel);
+            refreshProfiles();
+            updateStatus("Profile deleted", false);
+        } catch (Exception ex) {
+            logger.warn("Delete profile failed: {}", ex.getMessage());
+            updateStatus("Delete failed: " + ex.getMessage(), false);
+        }
+    }
+
+    @FXML
+    private void handleSetDefaultProfile() {
+        String sel = profileListView.getSelectionModel().getSelectedItem();
+        if (sel == null) {
+            updateStatus("Select profile", false);
+            return;
+        }
+        try {
+            profileService.setDefaultProfile(sel);
+            highlightDefaultProfile();
+            updateStatus("Default set", false);
+        } catch (Exception ex) {
+            updateStatus("Set default failed: " + ex.getMessage(), false);
+        }
+    }
+
+    @FXML
+    private void handleClearDefaultProfile() {
+        try {
+            profileService.setDefaultProfile("");
+            highlightDefaultProfile();
+            updateStatus("Default cleared", false);
+        } catch (Exception ex) {
+            updateStatus("Clear default failed: " + ex.getMessage(), false);
+        }
+    }
+
+    @FXML
+    private void handleRefreshProfiles() {
+        refreshProfiles();
+        highlightDefaultProfile();
+        updateStatus("Profiles refreshed", false);
+    }
+
+    private void refreshProfiles() {
+        if (profileListView != null) {
+            profileListView.getItems().setAll(profileService.listProfiles());
+        }
+    }
+
+    private void selectProfile(String name) {
+        if (profileListView != null) {
+            profileListView.getSelectionModel().select(name);
+        }
+    }
+
+    private void highlightDefaultProfile() {
+        String def = profileService.getDefaultProfile();
+        if (profileListView != null) {
+            profileListView.setCellFactory(list -> new javafx.scene.control.ListCell<>() {
+                @Override
+                protected void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty || item == null) {
+                        setText(null);
+                    } else {
+                        setText(item + (item.equals(def) ? " (default)" : ""));
+                    }
+                }
+            });
         }
     }
 

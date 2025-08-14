@@ -121,13 +121,14 @@ VoxStream is a Java-based application with a Java frontend and backend that inte
 - [x] Implement event purge time settings
 - [x] Add TTS bus purge time settings
 - [x] Create settings import/export
-- [ ] Add settings validation and defaults
+- [x] Add settings validation and defaults
   - [x] Add numeric range validators (purge intervals, max events, port)
   - [x] Implement composite validation (cross-field, dependency rules)
-  - [~] Add default profile management (save/restore named profiles) – service implemented, UI pending
+  - [x] Add default profile management (save/restore named profiles) – service & UI integrated
   - [x] Persist last successful export hash for change detection
+- [x] Integrate profile management UI (list/apply/delete/save-as/set default/clear default)
 
-> NOTE: Added ProfileService for saving/applying named configuration profiles (stored as JSON under config.profile.<name>). Default profile key config.profile.defaultName added; auto-apply at startup. Remaining work: integrate profile CRUD into Settings UI (list, save as, apply, delete) and add tests for profile round-trip.
+> NOTE: ProfileService + Settings tab UI now support full CRUD, default selection, and application of profiles. Remaining: add unit tests for profile round-trip and default apply semantics at startup.
 
 **Testing Phase 2:**
 - [ ] Test event bus performance with high volume
@@ -135,6 +136,7 @@ VoxStream is a Java-based application with a Java frontend and backend that inte
 - [ ] Test database operations and migrations
 - [ ] Validate configuration persistence
 - [ ] Test settings UI functionality
+- [ ] Add profile management tests (round-trip, default apply, checksum)
 
 ---
 

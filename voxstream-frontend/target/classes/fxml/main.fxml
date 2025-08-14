@@ -210,6 +210,32 @@
                               </HBox>
                               <CheckBox fx:id="enableCorsCheckbox" mnemonicParsing="false" text="Enable CORS" />
                               <Separator />
+                              <Label style="-fx-font-weight: bold;" text="Profiles" />
+                              <HBox spacing="10.0">
+                                 <children>
+                                    <VBox spacing="5.0">
+                                       <children>
+                                          <ListView fx:id="profileListView" prefHeight="140.0" prefWidth="220.0" />
+                                          <HBox spacing="5.0">
+                                             <children>
+                                                <TextField fx:id="newProfileNameField" promptText="New profile name" prefWidth="140.0" />
+                                                <Button mnemonicParsing="false" text="Save As" onAction="#handleSaveProfileAs" />
+                                             </children>
+                                          </HBox>
+                                       </children>
+                                    </VBox>
+                                    <VBox spacing="5.0">
+                                       <children>
+                                          <Button mnemonicParsing="false" text="Apply" onAction="#handleApplyProfile" prefWidth="140.0" />
+                                          <Button mnemonicParsing="false" text="Delete" onAction="#handleDeleteProfile" prefWidth="140.0" />
+                                          <Button mnemonicParsing="false" text="Set Default" onAction="#handleSetDefaultProfile" prefWidth="140.0" />
+                                          <Button mnemonicParsing="false" text="Clear Default" onAction="#handleClearDefaultProfile" prefWidth="140.0" />
+                                          <Button mnemonicParsing="false" text="Refresh" onAction="#handleRefreshProfiles" prefWidth="140.0" />
+                                       </children>
+                                    </VBox>
+                                 </children>
+                              </HBox>
+                              <Separator />
                               <HBox spacing="10.0">
                                  <children>
                                     <Button fx:id="saveSettingsButton" mnemonicParsing="false" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" text="Save Settings" onAction="#handleSaveSettings" />
