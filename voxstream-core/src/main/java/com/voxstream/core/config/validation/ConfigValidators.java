@@ -43,6 +43,9 @@ public final class ConfigValidators {
         // Heartbeat interval 5-3600 seconds
         register(CoreConfigKeys.PLATFORM_HEARTBEAT_INTERVAL_SEC, v -> v >= 5 && v <= 3600,
                 (k, v) -> fail(k, "must be between 5 and 3600 seconds"));
+        // Jitter percent 0.0 - 0.5
+        register(CoreConfigKeys.PLATFORM_RECONNECT_JITTER_PERCENT, v -> v >= 0.0 && v <= 0.5,
+                (k, v) -> fail(k, "must be between 0.0 and 0.5"));
     }
 
     private ConfigValidators() {

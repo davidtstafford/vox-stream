@@ -74,6 +74,11 @@ public final class CoreConfigKeys {
             "platform.heartbeat.intervalSec", Integer.class, 60, false,
             "Heartbeat / synthetic event emission interval in seconds");
 
+    // Add jitter percent (0.0 - 0.5 typical) for reconnect backoff randomization
+    public static final ConfigKey<Double> PLATFORM_RECONNECT_JITTER_PERCENT = new ConfigKey<>(
+            "platform.reconnect.jitterPercent", Double.class, 0.2d, false,
+            "Jitter percentage (0.0-0.5) applied to reconnect backoff delays");
+
     // Registry of all keys for iteration / import-export (order preserved)
     private static final Map<String, ConfigKey<?>> REGISTRY;
     public static final List<ConfigKey<?>> ALL;
@@ -96,6 +101,7 @@ public final class CoreConfigKeys {
         register(m, PLATFORM_RECONNECT_MAX_DELAY_MS);
         register(m, PLATFORM_RECONNECT_MAX_ATTEMPTS);
         register(m, PLATFORM_HEARTBEAT_INTERVAL_SEC);
+        register(m, PLATFORM_RECONNECT_JITTER_PERCENT);
         REGISTRY = Collections.unmodifiableMap(m);
         ALL = List.copyOf(REGISTRY.values());
     }

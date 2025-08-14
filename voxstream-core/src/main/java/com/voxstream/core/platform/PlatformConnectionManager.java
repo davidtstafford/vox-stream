@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -116,10 +117,22 @@ public class PlatformConnectionManager {
             return;
         }
         int maxDelay = config.get(CoreConfigKeys.PLATFORM_RECONNECT_MAX_DELAY_MS);
-        int delay = Math.min(previousDelayMs * 2, maxDelay);
-        updateStatus(state, PlatformStatus.reconnectScheduled(delay, nextAttempt));
-        state.metrics.currentBackoffMs = delay;
-        scheduler.schedule(() -> attemptConnect(state, nextAttempt, delay), delay, TimeUnit.MILLISECONDS);
+        int baseDelay = Math.min(previousDelayMs * 2, maxDelay);
+        // Apply jitter
+        double jitterPct = config.get(CoreConfigKeys.PLATFORM_RECONNECT_JITTER_PERCENT);
+        int adjustedDelay = baseDelay;
+        if (jitterPct > 0) {
+            long jitterRange = Math.round(baseDelay * jitterPct);
+            if (jitterRange > 0) {
+                long offset = ThreadLocalRandom.current().nextLong(-jitterRange, jitterRange + 1);
+                adjustedDelay = (int) Math.max(50, baseDelay + offset); // never below minimal 50ms safety
+            }
+        }
+        updateStatus(state, PlatformStatus.reconnectScheduled(adjustedDelay, nextAttempt));
+        state.metrics.currentBackoffMs = adjustedDelay;
+        final int scheduleDelay = adjustedDelay;
+        scheduler.schedule(() -> attemptConnect(state, nextAttempt, scheduleDelay), scheduleDelay,
+                TimeUnit.MILLISECONDS);
     }
 
     private void updateStatus(ConnState state, PlatformStatus newStatus) {
