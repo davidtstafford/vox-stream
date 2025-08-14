@@ -10,6 +10,7 @@
 /Users/davidstafford/git/vox-stream/voxstream-core/src/main/java/com/voxstream/core/event/EventType.java
 /Users/davidstafford/git/vox-stream/voxstream-core/src/main/java/com/voxstream/core/bus/EventBus.java
 /Users/davidstafford/git/vox-stream/voxstream-core/src/main/java/com/voxstream/core/model/Viewer.java
+/Users/davidstafford/git/vox-stream/voxstream-core/src/main/java/com/voxstream/core/platform/PlatformConnectionManager.java
 /Users/davidstafford/git/vox-stream/voxstream-core/src/main/java/com/voxstream/core/exception/VoxStreamException.java
 /Users/davidstafford/git/vox-stream/voxstream-core/src/main/java/com/voxstream/core/persistence/EventPersistenceService.java
 /Users/davidstafford/git/vox-stream/voxstream-core/src/main/java/com/voxstream/core/config/ConfigurationService.java

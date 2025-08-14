@@ -28,6 +28,25 @@ public class DummyPlatformConnection implements PlatformConnection {
     private final List<Consumer<PlatformStatus>> listeners = new CopyOnWriteArrayList<>();
     private volatile String sessionId;
 
+    // Failure injection: a sequence of booleans indicating success (true) or failure (false) for successive connect attempts
+    private volatile List<Boolean> scriptedOutcomes = List.of();
+    private volatile int outcomeIndex = 0;
+    private volatile long simulatedLatencyMs = 250;
+    @SuppressWarnings("unused")
+    private volatile boolean emitSyntheticEvents = false; // placeholder for future event emission toggle
+
+    /** Configure a sequence of outcomes for upcoming connect() attempts. */
+    public void setScriptedOutcomes(List<Boolean> outcomes) {
+        this.scriptedOutcomes = outcomes != null ? List.copyOf(outcomes) : List.of();
+        this.outcomeIndex = 0;
+    }
+
+    /** Adjust artificial latency for connect attempts. */
+    public void setSimulatedLatencyMs(long ms) { this.simulatedLatencyMs = ms; }
+
+    /** Toggle synthetic platform event emission (future hook). */
+    public void setEmitSyntheticEvents(boolean enable) { this.emitSyntheticEvents = enable; }
+
     @Override
     public CompletableFuture<Boolean> connect() {
         if (status.get().state() == State.CONNECTED) {
@@ -36,12 +55,24 @@ public class DummyPlatformConnection implements PlatformConnection {
         updateStatus(PlatformStatus.connecting());
         sessionId = UUID.randomUUID().toString();
         log.info("[DummyPlatform] Connecting session {}...", sessionId);
+        boolean scriptedFailure = false;
+        if (outcomeIndex < scriptedOutcomes.size()) {
+            boolean outcome = scriptedOutcomes.get(outcomeIndex++);
+            scriptedFailure = !outcome;
+        }
+        final boolean fail = scriptedFailure;
+        long latency = simulatedLatencyMs;
         return CompletableFuture.supplyAsync(() -> {
             try {
-                Thread.sleep(250); // simulate latency
+                Thread.sleep(latency);
+                if (fail) {
+                    updateStatus(PlatformStatus.failed("scripted-failure"));
+                    return false;
+                }
                 PlatformStatus connected = PlatformStatus.connected(Instant.now().toEpochMilli());
                 updateStatus(connected);
                 log.info("[DummyPlatform] Connected session {}", sessionId);
+                // future: if emitSyntheticEvents then start emitting events
                 return true;
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();

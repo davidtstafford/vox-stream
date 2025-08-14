@@ -147,28 +147,28 @@ VoxStream is a Java-based application with a Java frontend and backend that inte
 **Goal**: Connect to streaming platforms and capture events
 
 ### 3.1 Platform Connection Framework
-- [ ] Design platform abstraction layer
-  - [ ] Finalize core interfaces (PlatformConnection, PlatformConnectionFactory, PlatformCredential, PlatformStatus enum refinements)
-  - [ ] Add lifecycle methods: connect(), disconnect(), requestReconnect(), isConnected(), getStatus(), addStatusListener()
-  - [ ] Define event emission contract (PlatformEvent -> internal Event mapping hook)
-  - [ ] Add healthCheck() optional method
-- [ ] Create platform configuration models
+- [x] Design platform abstraction layer
+  - [x] Finalize core interfaces (PlatformConnection, PlatformConnectionFactory, PlatformCredential, PlatformStatus enum refinements)
+  - [x] Add lifecycle methods: connect(), disconnect(), requestReconnect(), isConnected(), getStatus(), addStatusListener()
+  - [x] Define event emission contract (PlatformEvent -> internal Event mapping hook) // initial placeholder (mapping hook to implement with first real platform)
+  - [x] Add healthCheck() optional method
+- [x] Create platform configuration models
   - [x] Add config keys: platform.enabled, reconnect.initialDelayMs, reconnect.maxDelayMs, reconnect.maxAttempts (-1=infinite), heartbeat.intervalSec
   - [x] Implement validators for new keys (ranges, relationships: initial < max, positive intervals)
   - [x] Profile support: include new keys in export/import & checksum
 - [ ] Implement connection management system
-  - [ ] PlatformConnectionManager orchestrating factories, active connections, lifecycle
-  - [ ] Track per-connection state machine (DISCONNECTED, CONNECTING, CONNECTED, FAILED, RECONNECT_SCHEDULED)
-  - [ ] Publish state change events onto EventBus (internal System event type extension)
-  - [ ] Persistence of last successful connection timestamp
+  - [x] PlatformConnectionManager orchestrating factories, active connections, lifecycle (initial implementation)
+  - [x] Track per-connection state machine (DISCONNECTED, CONNECTING, CONNECTED, FAILED, RECONNECT_SCHEDULED)
+  - [x] Publish state change events onto EventBus (internal System event type extension)
+  - [x] Persistence of last successful connection timestamp (in-memory; consider durable persistence later)
 - [ ] Add auto-reconnection logic
-  - [ ] Exponential backoff with jitter (configurable caps)
+  - [ ] Exponential backoff with jitter (current: doubling without jitter)
   - [ ] Distinguish transient vs fatal errors
   - [ ] Reset backoff on successful connect duration threshold
   - [ ] Tests with DummyPlatformConnection injecting failures sequence
 - [ ] Create connection status monitoring
-  - [ ] Metrics: connects, disconnects, failedAttempts, currentBackoffMs
-  - [ ] Snapshot API exposed via registry/manager
+  - [x] Metrics: connects, disconnects, failedAttempts, currentBackoffMs
+  - [x] Snapshot API exposed via manager
   - [ ] Periodic log summary (config flag)
 - [ ] Enhance DummyPlatformConnection for testing
   - [ ] Simulate connect latency & failure injection script
@@ -179,7 +179,7 @@ VoxStream is a Java-based application with a Java frontend and backend that inte
   - [ ] Auto-reconnect success after transient failures
   - [ ] Backoff growth & reset assertions
   - [ ] Status event propagation to EventBus subscribers
-  - [ ] Validation of new config keys (boundary, composite)
+  - [x] Validation of new config keys (boundary, composite)
 
 ### 3.2 Twitch Integration (MVP)
 - [ ] Setup Twitch API client
