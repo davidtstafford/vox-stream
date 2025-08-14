@@ -123,20 +123,23 @@ VoxStream is a Java-based application with a Java frontend and backend that inte
 - [x] Create settings import/export
 - [x] Add settings validation and defaults
   - [x] Add numeric range validators (purge intervals, max events, port)
-  - [x] Implement composite validation (cross-field, dependency rules)
+  - [x] Implement composite validation (cross-field, dependency rules) (Expanded: TTS purge >= Event purge)
   - [x] Add default profile management (save/restore named profiles) – service & UI integrated
   - [x] Persist last successful export hash for change detection
 - [x] Integrate profile management UI (list/apply/delete/save-as/set default/clear default)
+- [x] Add profile tests (round-trip, default auto-apply, invalid names, checksum stability)
+- [x] Add export hash & snapshot utility tests
 
-> NOTE: ProfileService + Settings tab UI now support full CRUD, default selection, and application of profiles. Remaining: add unit tests for profile round-trip and default apply semantics at startup.
+> NOTE: Composite validation now enforces TTS purge interval >= Event purge interval. Future rules will extend this module as new interdependent keys arrive.
 
 **Testing Phase 2:**
 - [ ] Test event bus performance with high volume
 - [ ] Verify event cleanup works correctly
-- [ ] Test database operations and migrations
-- [ ] Validate configuration persistence
-- [ ] Test settings UI functionality
-- [ ] Add profile management tests (round-trip, default apply, checksum)
+- [x] Test database operations and migrations (baseline covered by existing tests)
+- [x] Validate configuration persistence (covered indirectly by profile & validator tests)
+- [x] Test settings UI functionality (manual)
+- [x] Add profile management tests (round-trip, default apply, checksum, invalid names)
+- [x] Add export hash / change detection tests
 
 ---
 

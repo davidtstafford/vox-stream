@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.voxstream.core.dao.jdbc.JdbcConfigDao;
+import com.voxstream.core.security.EncryptionService;
 
 public class JdbcConfigDaoTest {
     private JdbcTemplate jdbc;
@@ -23,7 +24,8 @@ public class JdbcConfigDaoTest {
         jdbc = new JdbcTemplate(ds);
         jdbc.execute(
                 "CREATE TABLE app_config (cfg_key VARCHAR(128) PRIMARY KEY, cfg_value CLOB NULL, updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP)");
-        dao = new JdbcConfigDao(jdbc);
+        EncryptionService enc = new EncryptionService();
+        dao = new JdbcConfigDao(jdbc, enc);
     }
 
     @Test

@@ -21,12 +21,12 @@ class ConfigValidatorsTest {
     @BeforeEach
     void setup() {
         JdbcDataSource ds = new JdbcDataSource();
-        ds.setURL("jdbc:h2:mem:cfg-val-test;DB_CLOSE_DELAY=-1");
+        ds.setURL("jdbc:h2:mem:cfg-val-test-" + System.nanoTime() + ";DB_CLOSE_DELAY=-1"); // unique DB per test, keep alive
         ds.setUser("sa");
         ds.setPassword("");
         JdbcTemplate jdbc = new JdbcTemplate(ds);
         jdbc.execute(
-                "CREATE TABLE app_config (cfg_key VARCHAR(128) PRIMARY KEY, cfg_value CLOB NULL, updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP)");
+                "CREATE TABLE IF NOT EXISTS app_config (cfg_key VARCHAR(128) PRIMARY KEY, cfg_value CLOB NULL, updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP)");
         EncryptionService enc = new EncryptionService();
         JdbcConfigDao dao = new JdbcConfigDao(jdbc, enc);
         configService = new ConfigurationService(dao);
@@ -45,5 +45,15 @@ class ConfigValidatorsTest {
         assertThrows(IllegalArgumentException.class,
                 () -> configService.setAll(Map.of(CoreConfigKeys.WEB_OUTPUT_PORT, 65535)));
         assertDoesNotThrow(() -> configService.setAll(Map.of(CoreConfigKeys.WEB_OUTPUT_PORT, 8081)));
+    }
+
+    @Test
+    void compositeValidationTtsPurgeNotLessThanEvent() {
+        // event purge default 10, attempt to set tts purge smaller (5) should fail
+        assertThrows(IllegalArgumentException.class,
+                () -> configService.setAll(Map.of(CoreConfigKeys.TTS_BUS_PURGE_INTERVAL_MIN, 5)));
+        // large enough passes
+        assertDoesNotThrow(() -> configService
+                .setAll(Map.of(CoreConfigKeys.TTS_BUS_PURGE_INTERVAL_MIN, 20)));
     }
 }
