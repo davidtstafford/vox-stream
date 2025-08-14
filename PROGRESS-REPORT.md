@@ -1,9 +1,9 @@
-# VoxStream - Phase 1 Implementation Progress Report
+# VoxStream - Phase 1 & 2 Progress Report
 
 ## Overview
-VoxStream is a comprehensive Java application for streaming platform integration, text-to-speech (TTS), event management, and viewer interaction. This report covers the completion of Phase 1: Project Foundation & Setup.
+VoxStream is a comprehensive Java application for streaming platform integration, text-to-speech (TTS), event management, and viewer interaction. This report now reflects completion through Phase 2.4 (Advanced Settings Framework & JavaFX UI integration).
 
-## ✅ Completed Tasks
+## ✅ Completed Tasks (Phase 1 Recap)
 
 ### 1. Project Structure & Build System
 - ✅ Maven multi-module structure created
@@ -52,7 +52,68 @@ VoxStream is a comprehensive Java application for streaming platform integration
 ## 🔄 Current Issue
 The application has a minor logging compatibility issue with Logback and JavaFX runtime. This is being resolved with dependency updates.
 
-## 📁 Project Structure
+## ✅ Phase 2 Progress
+### 2.1 Event Bus System
+- ✅ Core pub/sub implementation with priority dispatch
+- ✅ Event models (base/general)
+- ✅ Filtering & routing (predicate + priority)
+- ✅ In-memory persistence hook points
+- ✅ Cleanup & purge scheduling (max size + age-based)
+- ✅ Metrics & snapshot support
+
+### 2.2 Database Layer
+- ✅ Embedded H2 setup
+- ✅ Schemas for events, viewers, configuration
+- ✅ DAO pattern implemented
+- ✅ Flyway baseline + migration runner
+- ✅ Data backup & restore groundwork
+
+### 2.3 Configuration Management
+- ✅ Configuration persistence via JDBC DAO
+- ✅ Validation framework (single-field validators)
+- ✅ Migration support (config.schema.version + Flyway seed)
+- ✅ Secure credential storage placeholder
+
+### 2.4 Advanced Settings Framework (NEW)
+- ✅ Settings UI tab with real-time value display
+- ✅ Added new config keys:
+  - TTS bus purge interval
+  - Web output port & CORS enable flag
+  - Last export hash tracking
+  - Default profile name reference
+- ✅ Numeric range validators (purge intervals, max events, port)
+- ✅ Composite validators (cross-field: TTS purge >= Event purge)
+- ✅ Batch setAll with aggregated validation & rollback on failure
+- ✅ Settings import/export (deterministic JSON) with hash computation
+- ✅ Change detection via stable export hash
+- ✅ ProfileService (CRUD, apply, default, checksum stability)
+- ✅ Profile management UI (list/apply/save-as/delete/set/unset default)
+- ✅ Export/import error handling & user feedback wiring
+- ✅ JacksonConfig providing ObjectMapper bean (non-web context)
+- ✅ JavaFX UI integration with Spring (ApplicationLauncher sequencing)
+- ✅ macOS NSTrackingRect crash resolved (deferred min size)
+- ✅ Upgraded JavaFX 21.0.4, stabilized plugin (0.0.8)
+- ✅ Unit tests added:
+  - ConfigValidatorsTest
+  - CompositeConfigValidators via ConfigValidators integration
+  - ProfileServiceTest
+  - ConfigExportUtilTest (hash stability)
+  - JdbcConfigDaoTest (isolation & schema creation)
+- ✅ Successful module + reactor Maven build
+- ✅ Verified JavaFX UI launches, tabs functional, clean shutdown
+
+## 🧪 Testing Summary
+- Core tests passing (16/16 in core module at last run)
+- Validation & profile logic covered by dedicated tests
+- Manual UI verification performed (settings edits, profile operations, import/export)
+
+## 🔄 Pending / Minor Tasks
+- Optimize shutdown logging (duplicate prevented with atomic guard) ✅
+- Evaluate removal of explicit @Import(JacksonConfig) (now removed, component scan works) ✅
+- Provide refined Logback configuration (FNATP deprecation cleanup) ⏳
+- Performance/load tests for event bus volume (Phase 2 stretch) ⏳
+
+## 📁 Project Structure (Unchanged High-Level)
 ```
 vox-stream/
 ├── voxstream-core/           # Core business logic
@@ -78,44 +139,34 @@ vox-stream/
 └── launch-voxstream.sh     # Application launcher
 ```
 
-## 🚀 Launcher Features
-The application includes sophisticated launcher scripts that:
-- ✅ Validate system requirements (OS, architecture, Java version)
-- ✅ Provide colored, user-friendly output
-- ✅ Perform complete builds with dependency resolution
-- ✅ Log all operations for troubleshooting
-- ✅ Handle errors gracefully with detailed messages
-- ✅ Support both macOS/Linux (bash) and Windows (batch)
+## 🚀 Launcher & UI Updates (Additions)
+- ✅ JavaFXLauncher + VoxStreamApplication integrated with Spring
+- ✅ Atomic guarded shutdown prevents duplicate context close logs
+- ✅ Deterministic configuration export enables reliable change detection
 
-## 🎯 Next Steps
-1. **Resolve logging compatibility** - Update Logback configuration
-2. **Complete JavaFX application launch** - Fix runtime issues
-3. **Implement DMG/EXE packaging** - Native installers
-4. **Add code signing** - Apple notarization support
-5. **Begin Phase 2** - Event bus and platform API implementation
+## 🎯 Next Immediate Steps
+1. Replace deprecated SizeAndTimeBasedFNATP with current triggering policy, finalize logback.xml
+2. Add tests for composite validation failure scenarios (edge cases)
+3. Begin Phase 3: Platform Connection Framework design
+4. Introduce performance benchmarks for event bus under configurable load
 
-## 🛠️ Technical Stack
-- **Java**: 17+ (with backward compatibility checks)
-- **UI Framework**: JavaFX 17+
-- **Backend**: Spring Boot 3+
-- **Build System**: Maven 3+
-- **Testing**: JUnit 5, TestFX
-- **Logging**: SLF4J with Logback
-- **CI/CD**: GitHub Actions
-- **Development**: VS Code, Docker
+## 🛠️ Technical Stack (Updated Highlights)
+- Java 17
+- JavaFX 21.0.4
+- Spring Boot 3.1.5 (context only, no web starter in frontend)
+- H2 2.2.224
+- Logback 1.4.11 (pending config modernization)
 
-## 📊 Metrics
-- **Lines of Code**: ~1,500+ (excluding tests)
-- **Modules**: 6 Maven modules
-- **Error Codes**: 25+ structured error codes
-- **Build Time**: ~10-15 seconds clean build
-- **Test Coverage**: Basic infrastructure tests in place
+## 📊 Metrics (Approximate)
+- Lines of Code: ~1,900+ (including new tests & UI)
+- Config Keys Managed: 20+ with validation
+- Profiles: CRUD + default support
 
-## 🎉 Achievements
-- ✅ **Complete Phase 1 foundation** - All core infrastructure implemented
-- ✅ **macOS Catalina compatibility** - Full validation and support
-- ✅ **Professional launcher** - Production-ready startup experience
-- ✅ **Comprehensive error handling** - User-friendly error management
-- ✅ **Modern development workflow** - VS Code, Docker, CI/CD ready
+## 🎉 Achievements (New Since Phase 1 Report)
+- ✅ Advanced settings & profile management framework
+- ✅ Deterministic export + hash-based change tracking
+- ✅ Composite configuration validation system
+- ✅ Stable JavaFX + Spring integration on macOS
+- ✅ Robust test coverage for new configuration services
 
-The project foundation is solid and ready for Phase 2 feature development!
+// ...existing remaining sections (Phase plans) remain in plan.md for full roadmap...

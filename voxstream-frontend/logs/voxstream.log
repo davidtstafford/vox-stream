@@ -385,3 +385,43 @@ Caused by: org.springframework.beans.factory.NoSuchBeanDefinitionException: No q
 2025-08-14 18:02:41.720 [JavaFX Application Thread] INFO  c.v.frontend.VoxStreamApplication - Spring Application Context closed
 2025-08-14 18:02:41.740 [JavaFX Application Thread] INFO  c.v.frontend.VoxStreamApplication - Stopping VoxStream Application...
 2025-08-14 18:02:41.740 [JavaFX Application Thread] INFO  c.v.frontend.VoxStreamApplication - Spring Application Context closed
+2025-08-14 18:11:00.875 [JavaFX-Launcher] WARN  o.f.c.i.database.base.Database - Flyway upgrade recommended: H2 2.2.224 is newer than this version of Flyway and support has not been tested. The latest supported version of H2 is 2.1.214.
+2025-08-14 18:11:01.030 [JavaFX-Launcher] WARN  c.v.core.security.EncryptionService - No master secret provided; using ephemeral key (secrets won't decrypt across restarts)
+2025-08-14 18:11:01.280 [JavaFX-Launcher] INFO  com.voxstream.core.bus.EventBusImpl - EventBus initialized with bufferSize=10000, threads=8, strategy=DROP_OLDEST
+2025-08-14 18:11:01.281 [JavaFX-Launcher] INFO  c.v.core.persistence.BackupService - BackupService initialized (H2 mode)
+2025-08-14 18:11:01.379 [JavaFX-Launcher] INFO  c.v.frontend.VoxStreamApplication - Spring Application Context initialized successfully
+2025-08-14 18:11:01.396 [JavaFX Application Thread] INFO  c.v.frontend.VoxStreamApplication - Starting JavaFX Application...
+2025-08-14 18:11:01.398 [ForkJoinPool.commonPool-worker-1] INFO  c.v.f.service.ApplicationLauncher - Starting VoxStream application launch sequence...
+2025-08-14 18:11:01.398 [ForkJoinPool.commonPool-worker-1] DEBUG c.v.f.service.ApplicationLauncher - Launch progress: {:.0%} - 0.1
+2025-08-14 18:11:01.399 [ForkJoinPool.commonPool-worker-1] INFO  c.v.core.service.CoreErrorHandler - System requirements validation passed
+2025-08-14 18:11:01.399 [ForkJoinPool.commonPool-worker-1] DEBUG c.v.f.service.ApplicationLauncher - Launch progress: {:.0%} - 0.3
+2025-08-14 18:11:01.399 [ForkJoinPool.commonPool-worker-1] INFO  c.v.f.service.ApplicationLauncher - Initializing core services...
+2025-08-14 18:11:01.399 [ForkJoinPool.commonPool-worker-1] DEBUG c.v.f.service.ApplicationLauncher - Logging system initialized
+2025-08-14 18:11:01.399 [ForkJoinPool.commonPool-worker-1] DEBUG c.v.f.service.ApplicationLauncher - Configuration system initialized
+2025-08-14 18:11:01.399 [ForkJoinPool.commonPool-worker-1] DEBUG c.v.f.service.ApplicationLauncher - Event bus initialized
+2025-08-14 18:11:01.399 [ForkJoinPool.commonPool-worker-1] DEBUG c.v.f.service.ApplicationLauncher - Launch progress: {:.0%} - 0.5
+2025-08-14 18:11:01.399 [ForkJoinPool.commonPool-worker-1] INFO  c.v.f.service.ApplicationLauncher - Initializing platform services...
+2025-08-14 18:11:01.399 [ForkJoinPool.commonPool-worker-1] DEBUG c.v.f.service.ApplicationLauncher - Platform API services initialized
+2025-08-14 18:11:01.399 [ForkJoinPool.commonPool-worker-1] DEBUG c.v.f.service.ApplicationLauncher - TTS services initialized
+2025-08-14 18:11:01.399 [ForkJoinPool.commonPool-worker-1] DEBUG c.v.f.service.ApplicationLauncher - Web output services initialized
+2025-08-14 18:11:01.399 [ForkJoinPool.commonPool-worker-1] DEBUG c.v.f.service.ApplicationLauncher - Launch progress: {:.0%} - 0.7
+2025-08-14 18:11:01.399 [ForkJoinPool.commonPool-worker-1] INFO  c.v.f.service.ApplicationLauncher - Initializing UI components...
+2025-08-14 18:11:01.399 [ForkJoinPool.commonPool-worker-1] DEBUG c.v.f.service.ApplicationLauncher - UI components ready
+2025-08-14 18:11:01.400 [ForkJoinPool.commonPool-worker-1] DEBUG c.v.f.service.ApplicationLauncher - Launch progress: {:.0%} - 0.9
+2025-08-14 18:11:01.400 [ForkJoinPool.commonPool-worker-1] INFO  c.v.f.service.ApplicationLauncher - Finalizing application setup...
+2025-08-14 18:11:01.400 [ForkJoinPool.commonPool-worker-1] DEBUG c.v.f.service.ApplicationLauncher - Application setup finalized
+2025-08-14 18:11:01.400 [ForkJoinPool.commonPool-worker-1] DEBUG c.v.f.service.ApplicationLauncher - Launch progress: {:.0%} - 1.0
+2025-08-14 18:11:01.400 [ForkJoinPool.commonPool-worker-1] INFO  c.v.f.service.ApplicationLauncher - VoxStream application launched successfully
+2025-08-14 18:11:01.598 [JavaFX Application Thread] DEBUG c.v.f.controller.MainController - Connections tab selected
+2025-08-14 18:11:01.698 [JavaFX Application Thread] INFO  c.v.f.controller.MainController - Initializing Main Controller...
+2025-08-14 18:11:01.724 [JavaFX Application Thread] INFO  c.v.f.controller.MainController - Main Controller initialized successfully
+2025-08-14 18:11:02.398 [JavaFX Application Thread] INFO  c.v.frontend.VoxStreamApplication - JavaFX Application started successfully
+2025-08-14 18:11:13.589 [JavaFX Application Thread] DEBUG c.v.f.controller.MainController - Connections tab selected
+2025-08-14 18:11:13.589 [JavaFX Application Thread] DEBUG c.v.f.controller.MainController - Switched to tab: Settings
+2025-08-14 18:11:13.590 [JavaFX Application Thread] DEBUG c.v.f.controller.MainController - Settings tab selected
+2025-08-14 18:11:14.755 [JavaFX Application Thread] DEBUG c.v.f.controller.MainController - Settings tab selected
+2025-08-14 18:11:14.756 [JavaFX Application Thread] DEBUG c.v.f.controller.MainController - Switched to tab: Connections
+2025-08-14 18:11:14.756 [JavaFX Application Thread] DEBUG c.v.f.controller.MainController - Connections tab selected
+2025-08-14 18:11:18.421 [JavaFX Application Thread] INFO  c.v.frontend.VoxStreamApplication - Application close requested
+2025-08-14 18:11:18.436 [JavaFX Application Thread] INFO  c.v.frontend.VoxStreamApplication - Stopping VoxStream Application...
+2025-08-14 18:11:18.442 [JavaFX Application Thread] INFO  c.v.frontend.VoxStreamApplication - Spring Application Context closed

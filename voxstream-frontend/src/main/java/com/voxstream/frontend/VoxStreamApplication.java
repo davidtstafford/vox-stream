@@ -1,14 +1,14 @@
 package com.voxstream.frontend;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Import;
 
-import com.voxstream.core.config.JacksonConfig; // added explicit import
 import com.voxstream.core.exception.ErrorCode;
 import com.voxstream.frontend.service.ApplicationLauncher;
 import com.voxstream.frontend.service.ErrorHandler;
@@ -26,7 +26,6 @@ import javafx.stage.Stage;
  */
 @SpringBootApplication
 @ComponentScan(basePackages = "com.voxstream")
-@Import({ JacksonConfig.class }) // ensure core configuration beans (ObjectMapper) are registered
 public class VoxStreamApplication extends Application {
 
     private static final Logger logger = LoggerFactory.getLogger(VoxStreamApplication.class);
@@ -36,6 +35,7 @@ public class VoxStreamApplication extends Application {
     private ConfigurableApplicationContext springContext;
     private ApplicationLauncher applicationLauncher;
     private ErrorHandler errorHandler;
+    private final AtomicBoolean shutdownInitiated = new AtomicBoolean(false);
 
     public static void main(String[] args) {
         // This main method should not be called directly for JavaFX
@@ -107,14 +107,11 @@ public class VoxStreamApplication extends Application {
 
             primaryStage.setTitle(APPLICATION_TITLE + " - " + VERSION);
             primaryStage.setScene(scene);
-            // Removed immediate min size set to avoid NSTrackingRect crash on macOS
-            // primaryStage.setMinWidth(800);
-            // primaryStage.setMinHeight(600);
 
-            // Handle close request properly
+            // Handle close request: delegate to Platform.exit(), shutdown handled in stop()
             primaryStage.setOnCloseRequest(event -> {
                 logger.info("Application close requested");
-                shutdown();
+                Platform.exit();
             });
 
             primaryStage.show();
@@ -146,6 +143,9 @@ public class VoxStreamApplication extends Application {
     }
 
     private void shutdown() {
+        if (!shutdownInitiated.compareAndSet(false, true)) {
+            return; // already shutting down
+        }
         try {
             if (springContext != null) {
                 springContext.close();
