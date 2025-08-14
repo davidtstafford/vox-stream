@@ -19,7 +19,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         
         <!-- Framework Versions -->
-        <javafx.version>17.0.2</javafx.version>
+        <!-- Upgrade JavaFX to stable LTS to avoid macOS NSTrackingRect crash -->
+        <javafx.version>21.0.4</javafx.version>
         <spring.boot.version>3.1.5</spring.boot.version>
         <spring.version>6.0.13</spring.version>
         

@@ -6,7 +6,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Import;
 
+import com.voxstream.core.config.JacksonConfig; // added explicit import
 import com.voxstream.core.exception.ErrorCode;
 import com.voxstream.frontend.service.ApplicationLauncher;
 import com.voxstream.frontend.service.ErrorHandler;
@@ -24,6 +26,7 @@ import javafx.stage.Stage;
  */
 @SpringBootApplication
 @ComponentScan(basePackages = "com.voxstream")
+@Import({ JacksonConfig.class }) // ensure core configuration beans (ObjectMapper) are registered
 public class VoxStreamApplication extends Application {
 
     private static final Logger logger = LoggerFactory.getLogger(VoxStreamApplication.class);
@@ -104,8 +107,9 @@ public class VoxStreamApplication extends Application {
 
             primaryStage.setTitle(APPLICATION_TITLE + " - " + VERSION);
             primaryStage.setScene(scene);
-            primaryStage.setMinWidth(800);
-            primaryStage.setMinHeight(600);
+            // Removed immediate min size set to avoid NSTrackingRect crash on macOS
+            // primaryStage.setMinWidth(800);
+            // primaryStage.setMinHeight(600);
 
             // Handle close request properly
             primaryStage.setOnCloseRequest(event -> {
@@ -114,6 +118,11 @@ public class VoxStreamApplication extends Application {
             });
 
             primaryStage.show();
+            // Defer min size to after show to avoid native tracking rect issues
+            Platform.runLater(() -> {
+                primaryStage.setMinWidth(800);
+                primaryStage.setMinHeight(600);
+            });
             logger.info("JavaFX Application started successfully");
 
         } catch (Exception e) {

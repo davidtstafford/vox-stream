@@ -15,6 +15,7 @@ com/voxstream/core/config/validation/ConfigValidators$ValidatorEntry.class
 com/voxstream/core/persistence/EventPersistenceService$1.class
 com/voxstream/core/dao/ViewerDao.class
 com/voxstream/core/security/EncryptionService.class
+com/voxstream/core/config/JacksonConfig.class
 com/voxstream/core/model/Viewer.class
 com/voxstream/core/exception/ErrorCode.class
 com/voxstream/core/dao/jdbc/JdbcConfigDao.class

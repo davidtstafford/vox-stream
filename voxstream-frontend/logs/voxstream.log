@@ -50,3 +50,338 @@
 2025-08-14 13:16:34.038 [JavaFX Application Thread] DEBUG c.v.f.controller.MainController - Connections tab selected
 2025-08-14 13:16:34.104 [JavaFX Application Thread] INFO  c.v.f.controller.MainController - Initializing Main Controller...
 2025-08-14 13:16:34.105 [JavaFX Application Thread] INFO  c.v.f.controller.MainController - Main Controller initialized successfully
+2025-08-14 17:13:15.727 [JavaFX-Launcher] WARN  o.f.c.i.database.base.Database - Flyway upgrade recommended: H2 2.2.224 is newer than this version of Flyway and support has not been tested. The latest supported version of H2 is 2.1.214.
+2025-08-14 17:13:15.860 [JavaFX-Launcher] WARN  c.v.core.security.EncryptionService - No master secret provided; using ephemeral key (secrets won't decrypt across restarts)
+2025-08-14 17:13:15.920 [JavaFX-Launcher] WARN  o.s.c.a.AnnotationConfigApplicationContext - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'eventBusImpl' defined in URL [jar:file:/Users/davidstafford/.m2/repository/com/voxstream/voxstream-core/1.0.0-SNAPSHOT/voxstream-core-1.0.0-SNAPSHOT.jar!/com/voxstream/core/bus/EventBusImpl.class]: Unsatisfied dependency expressed through constructor parameter 2: Error creating bean with name 'eventPersistenceService' defined in URL [jar:file:/Users/davidstafford/.m2/repository/com/voxstream/voxstream-core/1.0.0-SNAPSHOT/voxstream-core-1.0.0-SNAPSHOT.jar!/com/voxstream/core/persistence/EventPersistenceService.class]: Unsatisfied dependency expressed through constructor parameter 1: No qualifying bean of type 'com.fasterxml.jackson.databind.ObjectMapper' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {}
+2025-08-14 17:13:15.965 [JavaFX-Launcher] ERROR o.s.b.d.LoggingFailureAnalysisReporter - 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Parameter 1 of constructor in com.voxstream.core.persistence.EventPersistenceService required a bean of type 'com.fasterxml.jackson.databind.ObjectMapper' that could not be found.
+
+
+Action:
+
+Consider defining a bean of type 'com.fasterxml.jackson.databind.ObjectMapper' in your configuration.
+
+2025-08-14 17:13:15.966 [JavaFX-Launcher] ERROR c.v.frontend.VoxStreamApplication - Failed to initialize Spring context
+org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'eventBusImpl' defined in URL [jar:file:/Users/davidstafford/.m2/repository/com/voxstream/voxstream-core/1.0.0-SNAPSHOT/voxstream-core-1.0.0-SNAPSHOT.jar!/com/voxstream/core/bus/EventBusImpl.class]: Unsatisfied dependency expressed through constructor parameter 2: Error creating bean with name 'eventPersistenceService' defined in URL [jar:file:/Users/davidstafford/.m2/repository/com/voxstream/voxstream-core/1.0.0-SNAPSHOT/voxstream-core-1.0.0-SNAPSHOT.jar!/com/voxstream/core/persistence/EventPersistenceService.class]: Unsatisfied dependency expressed through constructor parameter 1: No qualifying bean of type 'com.fasterxml.jackson.databind.ObjectMapper' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {}
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:801)
+	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:240)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1352)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1189)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:560)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:520)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:325)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:323)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:973)
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:950)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:616)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:738)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:440)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:316)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1306)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1295)
+	at com.voxstream.frontend.VoxStreamApplication.init(VoxStreamApplication.java:63)
+	at javafx.graphics/com.sun.javafx.application.LauncherImpl.launchApplication1(LauncherImpl.java:825)
+	at javafx.graphics/com.sun.javafx.application.LauncherImpl.lambda$launchApplication$2(LauncherImpl.java:196)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+Caused by: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'eventPersistenceService' defined in URL [jar:file:/Users/davidstafford/.m2/repository/com/voxstream/voxstream-core/1.0.0-SNAPSHOT/voxstream-core-1.0.0-SNAPSHOT.jar!/com/voxstream/core/persistence/EventPersistenceService.class]: Unsatisfied dependency expressed through constructor parameter 1: No qualifying bean of type 'com.fasterxml.jackson.databind.ObjectMapper' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {}
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:801)
+	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:240)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1352)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1189)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:560)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:520)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:325)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:323)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)
+	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1417)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1337)
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:910)
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:788)
+	... 21 common frames omitted
+Caused by: org.springframework.beans.factory.NoSuchBeanDefinitionException: No qualifying bean of type 'com.fasterxml.jackson.databind.ObjectMapper' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {}
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.raiseNoMatchingBeanFound(DefaultListableBeanFactory.java:1824)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1383)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1337)
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:910)
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:788)
+	... 35 common frames omitted
+2025-08-14 17:47:03.233 [JavaFX-Launcher] WARN  o.f.c.i.database.base.Database - Flyway upgrade recommended: H2 2.2.224 is newer than this version of Flyway and support has not been tested. The latest supported version of H2 is 2.1.214.
+2025-08-14 17:47:03.375 [JavaFX-Launcher] WARN  c.v.core.security.EncryptionService - No master secret provided; using ephemeral key (secrets won't decrypt across restarts)
+2025-08-14 17:47:03.433 [JavaFX-Launcher] WARN  o.s.c.a.AnnotationConfigApplicationContext - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'eventBusImpl' defined in URL [jar:file:/Users/davidstafford/.m2/repository/com/voxstream/voxstream-core/1.0.0-SNAPSHOT/voxstream-core-1.0.0-SNAPSHOT.jar!/com/voxstream/core/bus/EventBusImpl.class]: Unsatisfied dependency expressed through constructor parameter 2: Error creating bean with name 'eventPersistenceService' defined in URL [jar:file:/Users/davidstafford/.m2/repository/com/voxstream/voxstream-core/1.0.0-SNAPSHOT/voxstream-core-1.0.0-SNAPSHOT.jar!/com/voxstream/core/persistence/EventPersistenceService.class]: Unsatisfied dependency expressed through constructor parameter 1: No qualifying bean of type 'com.fasterxml.jackson.databind.ObjectMapper' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {}
+2025-08-14 17:47:03.473 [JavaFX-Launcher] ERROR o.s.b.d.LoggingFailureAnalysisReporter - 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Parameter 1 of constructor in com.voxstream.core.persistence.EventPersistenceService required a bean of type 'com.fasterxml.jackson.databind.ObjectMapper' that could not be found.
+
+
+Action:
+
+Consider defining a bean of type 'com.fasterxml.jackson.databind.ObjectMapper' in your configuration.
+
+2025-08-14 17:47:03.474 [JavaFX-Launcher] ERROR c.v.frontend.VoxStreamApplication - Failed to initialize Spring context
+org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'eventBusImpl' defined in URL [jar:file:/Users/davidstafford/.m2/repository/com/voxstream/voxstream-core/1.0.0-SNAPSHOT/voxstream-core-1.0.0-SNAPSHOT.jar!/com/voxstream/core/bus/EventBusImpl.class]: Unsatisfied dependency expressed through constructor parameter 2: Error creating bean with name 'eventPersistenceService' defined in URL [jar:file:/Users/davidstafford/.m2/repository/com/voxstream/voxstream-core/1.0.0-SNAPSHOT/voxstream-core-1.0.0-SNAPSHOT.jar!/com/voxstream/core/persistence/EventPersistenceService.class]: Unsatisfied dependency expressed through constructor parameter 1: No qualifying bean of type 'com.fasterxml.jackson.databind.ObjectMapper' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {}
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:801)
+	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:240)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1352)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1189)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:560)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:520)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:325)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:323)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:973)
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:950)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:616)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:738)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:440)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:316)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1306)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1295)
+	at com.voxstream.frontend.VoxStreamApplication.init(VoxStreamApplication.java:63)
+	at javafx.graphics/com.sun.javafx.application.LauncherImpl.launchApplication1(LauncherImpl.java:825)
+	at javafx.graphics/com.sun.javafx.application.LauncherImpl.lambda$launchApplication$2(LauncherImpl.java:196)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+Caused by: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'eventPersistenceService' defined in URL [jar:file:/Users/davidstafford/.m2/repository/com/voxstream/voxstream-core/1.0.0-SNAPSHOT/voxstream-core-1.0.0-SNAPSHOT.jar!/com/voxstream/core/persistence/EventPersistenceService.class]: Unsatisfied dependency expressed through constructor parameter 1: No qualifying bean of type 'com.fasterxml.jackson.databind.ObjectMapper' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {}
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:801)
+	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:240)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1352)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1189)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:560)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:520)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:325)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:323)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)
+	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1417)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1337)
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:910)
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:788)
+	... 21 common frames omitted
+Caused by: org.springframework.beans.factory.NoSuchBeanDefinitionException: No qualifying bean of type 'com.fasterxml.jackson.databind.ObjectMapper' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {}
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.raiseNoMatchingBeanFound(DefaultListableBeanFactory.java:1824)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1383)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1337)
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:910)
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:788)
+	... 35 common frames omitted
+2025-08-14 17:48:13.506 [JavaFX-Launcher] WARN  o.f.c.i.database.base.Database - Flyway upgrade recommended: H2 2.2.224 is newer than this version of Flyway and support has not been tested. The latest supported version of H2 is 2.1.214.
+2025-08-14 17:48:13.618 [JavaFX-Launcher] WARN  c.v.core.security.EncryptionService - No master secret provided; using ephemeral key (secrets won't decrypt across restarts)
+2025-08-14 17:48:13.676 [JavaFX-Launcher] WARN  o.s.c.a.AnnotationConfigApplicationContext - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'eventBusImpl' defined in URL [jar:file:/Users/davidstafford/.m2/repository/com/voxstream/voxstream-core/1.0.0-SNAPSHOT/voxstream-core-1.0.0-SNAPSHOT.jar!/com/voxstream/core/bus/EventBusImpl.class]: Unsatisfied dependency expressed through constructor parameter 2: Error creating bean with name 'eventPersistenceService' defined in URL [jar:file:/Users/davidstafford/.m2/repository/com/voxstream/voxstream-core/1.0.0-SNAPSHOT/voxstream-core-1.0.0-SNAPSHOT.jar!/com/voxstream/core/persistence/EventPersistenceService.class]: Unsatisfied dependency expressed through constructor parameter 1: No qualifying bean of type 'com.fasterxml.jackson.databind.ObjectMapper' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {}
+2025-08-14 17:48:13.714 [JavaFX-Launcher] ERROR o.s.b.d.LoggingFailureAnalysisReporter - 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Parameter 1 of constructor in com.voxstream.core.persistence.EventPersistenceService required a bean of type 'com.fasterxml.jackson.databind.ObjectMapper' that could not be found.
+
+
+Action:
+
+Consider defining a bean of type 'com.fasterxml.jackson.databind.ObjectMapper' in your configuration.
+
+2025-08-14 17:48:13.715 [JavaFX-Launcher] ERROR c.v.frontend.VoxStreamApplication - Failed to initialize Spring context
+org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'eventBusImpl' defined in URL [jar:file:/Users/davidstafford/.m2/repository/com/voxstream/voxstream-core/1.0.0-SNAPSHOT/voxstream-core-1.0.0-SNAPSHOT.jar!/com/voxstream/core/bus/EventBusImpl.class]: Unsatisfied dependency expressed through constructor parameter 2: Error creating bean with name 'eventPersistenceService' defined in URL [jar:file:/Users/davidstafford/.m2/repository/com/voxstream/voxstream-core/1.0.0-SNAPSHOT/voxstream-core-1.0.0-SNAPSHOT.jar!/com/voxstream/core/persistence/EventPersistenceService.class]: Unsatisfied dependency expressed through constructor parameter 1: No qualifying bean of type 'com.fasterxml.jackson.databind.ObjectMapper' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {}
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:801)
+	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:240)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1352)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1189)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:560)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:520)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:325)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:323)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:973)
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:950)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:616)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:738)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:440)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:316)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1306)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1295)
+	at com.voxstream.frontend.VoxStreamApplication.init(VoxStreamApplication.java:63)
+	at javafx.graphics/com.sun.javafx.application.LauncherImpl.launchApplication1(LauncherImpl.java:825)
+	at javafx.graphics/com.sun.javafx.application.LauncherImpl.lambda$launchApplication$2(LauncherImpl.java:196)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+Caused by: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'eventPersistenceService' defined in URL [jar:file:/Users/davidstafford/.m2/repository/com/voxstream/voxstream-core/1.0.0-SNAPSHOT/voxstream-core-1.0.0-SNAPSHOT.jar!/com/voxstream/core/persistence/EventPersistenceService.class]: Unsatisfied dependency expressed through constructor parameter 1: No qualifying bean of type 'com.fasterxml.jackson.databind.ObjectMapper' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {}
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:801)
+	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:240)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1352)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1189)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:560)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:520)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:325)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:323)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)
+	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1417)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1337)
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:910)
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:788)
+	... 21 common frames omitted
+Caused by: org.springframework.beans.factory.NoSuchBeanDefinitionException: No qualifying bean of type 'com.fasterxml.jackson.databind.ObjectMapper' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {}
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.raiseNoMatchingBeanFound(DefaultListableBeanFactory.java:1824)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1383)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1337)
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:910)
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:788)
+	... 35 common frames omitted
+2025-08-14 17:50:37.745 [JavaFX-Launcher] WARN  o.f.c.i.database.base.Database - Flyway upgrade recommended: H2 2.2.224 is newer than this version of Flyway and support has not been tested. The latest supported version of H2 is 2.1.214.
+2025-08-14 17:50:37.878 [JavaFX-Launcher] WARN  c.v.core.security.EncryptionService - No master secret provided; using ephemeral key (secrets won't decrypt across restarts)
+2025-08-14 17:50:37.934 [JavaFX-Launcher] WARN  o.s.c.a.AnnotationConfigApplicationContext - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'eventBusImpl' defined in URL [jar:file:/Users/davidstafford/.m2/repository/com/voxstream/voxstream-core/1.0.0-SNAPSHOT/voxstream-core-1.0.0-SNAPSHOT.jar!/com/voxstream/core/bus/EventBusImpl.class]: Unsatisfied dependency expressed through constructor parameter 2: Error creating bean with name 'eventPersistenceService' defined in URL [jar:file:/Users/davidstafford/.m2/repository/com/voxstream/voxstream-core/1.0.0-SNAPSHOT/voxstream-core-1.0.0-SNAPSHOT.jar!/com/voxstream/core/persistence/EventPersistenceService.class]: Unsatisfied dependency expressed through constructor parameter 1: No qualifying bean of type 'com.fasterxml.jackson.databind.ObjectMapper' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {}
+2025-08-14 17:50:37.977 [JavaFX-Launcher] ERROR o.s.b.d.LoggingFailureAnalysisReporter - 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Parameter 1 of constructor in com.voxstream.core.persistence.EventPersistenceService required a bean of type 'com.fasterxml.jackson.databind.ObjectMapper' that could not be found.
+
+
+Action:
+
+Consider defining a bean of type 'com.fasterxml.jackson.databind.ObjectMapper' in your configuration.
+
+2025-08-14 17:50:37.977 [JavaFX-Launcher] ERROR c.v.frontend.VoxStreamApplication - Failed to initialize Spring context
+org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'eventBusImpl' defined in URL [jar:file:/Users/davidstafford/.m2/repository/com/voxstream/voxstream-core/1.0.0-SNAPSHOT/voxstream-core-1.0.0-SNAPSHOT.jar!/com/voxstream/core/bus/EventBusImpl.class]: Unsatisfied dependency expressed through constructor parameter 2: Error creating bean with name 'eventPersistenceService' defined in URL [jar:file:/Users/davidstafford/.m2/repository/com/voxstream/voxstream-core/1.0.0-SNAPSHOT/voxstream-core-1.0.0-SNAPSHOT.jar!/com/voxstream/core/persistence/EventPersistenceService.class]: Unsatisfied dependency expressed through constructor parameter 1: No qualifying bean of type 'com.fasterxml.jackson.databind.ObjectMapper' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {}
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:801)
+	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:240)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1352)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1189)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:560)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:520)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:325)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:323)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:973)
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:950)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:616)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:738)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:440)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:316)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1306)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1295)
+	at com.voxstream.frontend.VoxStreamApplication.init(VoxStreamApplication.java:63)
+	at javafx.graphics/com.sun.javafx.application.LauncherImpl.launchApplication1(LauncherImpl.java:825)
+	at javafx.graphics/com.sun.javafx.application.LauncherImpl.lambda$launchApplication$2(LauncherImpl.java:196)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+Caused by: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'eventPersistenceService' defined in URL [jar:file:/Users/davidstafford/.m2/repository/com/voxstream/voxstream-core/1.0.0-SNAPSHOT/voxstream-core-1.0.0-SNAPSHOT.jar!/com/voxstream/core/persistence/EventPersistenceService.class]: Unsatisfied dependency expressed through constructor parameter 1: No qualifying bean of type 'com.fasterxml.jackson.databind.ObjectMapper' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {}
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:801)
+	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:240)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1352)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1189)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:560)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:520)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:325)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:323)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)
+	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1417)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1337)
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:910)
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:788)
+	... 21 common frames omitted
+Caused by: org.springframework.beans.factory.NoSuchBeanDefinitionException: No qualifying bean of type 'com.fasterxml.jackson.databind.ObjectMapper' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {}
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.raiseNoMatchingBeanFound(DefaultListableBeanFactory.java:1824)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1383)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1337)
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:910)
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:788)
+	... 35 common frames omitted
+2025-08-14 17:53:32.702 [JavaFX-Launcher] WARN  o.f.c.i.database.base.Database - Flyway upgrade recommended: H2 2.2.224 is newer than this version of Flyway and support has not been tested. The latest supported version of H2 is 2.1.214.
+2025-08-14 17:53:32.822 [JavaFX-Launcher] WARN  c.v.core.security.EncryptionService - No master secret provided; using ephemeral key (secrets won't decrypt across restarts)
+2025-08-14 17:53:33.030 [JavaFX-Launcher] INFO  com.voxstream.core.bus.EventBusImpl - EventBus initialized with bufferSize=10000, threads=8, strategy=DROP_OLDEST
+2025-08-14 17:53:33.032 [JavaFX-Launcher] INFO  c.v.core.persistence.BackupService - BackupService initialized (H2 mode)
+2025-08-14 17:53:33.131 [JavaFX-Launcher] INFO  c.v.frontend.VoxStreamApplication - Spring Application Context initialized successfully
+2025-08-14 17:53:33.149 [JavaFX Application Thread] INFO  c.v.frontend.VoxStreamApplication - Starting JavaFX Application...
+2025-08-14 17:53:33.151 [ForkJoinPool.commonPool-worker-1] INFO  c.v.f.service.ApplicationLauncher - Starting VoxStream application launch sequence...
+2025-08-14 17:53:33.151 [ForkJoinPool.commonPool-worker-1] DEBUG c.v.f.service.ApplicationLauncher - Launch progress: {:.0%} - 0.1
+2025-08-14 17:53:33.152 [ForkJoinPool.commonPool-worker-1] INFO  c.v.core.service.CoreErrorHandler - System requirements validation passed
+2025-08-14 17:53:33.152 [ForkJoinPool.commonPool-worker-1] DEBUG c.v.f.service.ApplicationLauncher - Launch progress: {:.0%} - 0.3
+2025-08-14 17:53:33.152 [ForkJoinPool.commonPool-worker-1] INFO  c.v.f.service.ApplicationLauncher - Initializing core services...
+2025-08-14 17:53:33.152 [ForkJoinPool.commonPool-worker-1] DEBUG c.v.f.service.ApplicationLauncher - Logging system initialized
+2025-08-14 17:53:33.152 [ForkJoinPool.commonPool-worker-1] DEBUG c.v.f.service.ApplicationLauncher - Configuration system initialized
+2025-08-14 17:53:33.152 [ForkJoinPool.commonPool-worker-1] DEBUG c.v.f.service.ApplicationLauncher - Event bus initialized
+2025-08-14 17:53:33.152 [ForkJoinPool.commonPool-worker-1] DEBUG c.v.f.service.ApplicationLauncher - Launch progress: {:.0%} - 0.5
+2025-08-14 17:53:33.152 [ForkJoinPool.commonPool-worker-1] INFO  c.v.f.service.ApplicationLauncher - Initializing platform services...
+2025-08-14 17:53:33.153 [ForkJoinPool.commonPool-worker-1] DEBUG c.v.f.service.ApplicationLauncher - Platform API services initialized
+2025-08-14 17:53:33.153 [ForkJoinPool.commonPool-worker-1] DEBUG c.v.f.service.ApplicationLauncher - TTS services initialized
+2025-08-14 17:53:33.153 [ForkJoinPool.commonPool-worker-1] DEBUG c.v.f.service.ApplicationLauncher - Web output services initialized
+2025-08-14 17:53:33.153 [ForkJoinPool.commonPool-worker-1] DEBUG c.v.f.service.ApplicationLauncher - Launch progress: {:.0%} - 0.7
+2025-08-14 17:53:33.153 [ForkJoinPool.commonPool-worker-1] INFO  c.v.f.service.ApplicationLauncher - Initializing UI components...
+2025-08-14 17:53:33.153 [ForkJoinPool.commonPool-worker-1] DEBUG c.v.f.service.ApplicationLauncher - UI components ready
+2025-08-14 17:53:33.153 [ForkJoinPool.commonPool-worker-1] DEBUG c.v.f.service.ApplicationLauncher - Launch progress: {:.0%} - 0.9
+2025-08-14 17:53:33.153 [ForkJoinPool.commonPool-worker-1] INFO  c.v.f.service.ApplicationLauncher - Finalizing application setup...
+2025-08-14 17:53:33.153 [ForkJoinPool.commonPool-worker-1] DEBUG c.v.f.service.ApplicationLauncher - Application setup finalized
+2025-08-14 17:53:33.153 [ForkJoinPool.commonPool-worker-1] DEBUG c.v.f.service.ApplicationLauncher - Launch progress: {:.0%} - 1.0
+2025-08-14 17:53:33.153 [ForkJoinPool.commonPool-worker-1] INFO  c.v.f.service.ApplicationLauncher - VoxStream application launched successfully
+2025-08-14 17:53:33.378 [JavaFX Application Thread] DEBUG c.v.f.controller.MainController - Connections tab selected
+2025-08-14 17:53:33.462 [JavaFX Application Thread] INFO  c.v.f.controller.MainController - Initializing Main Controller...
+2025-08-14 17:53:33.480 [JavaFX Application Thread] INFO  c.v.f.controller.MainController - Main Controller initialized successfully
+2025-08-14 18:01:43.196 [JavaFX-Launcher] WARN  o.f.c.i.database.base.Database - Flyway upgrade recommended: H2 2.2.224 is newer than this version of Flyway and support has not been tested. The latest supported version of H2 is 2.1.214.
+2025-08-14 18:01:43.320 [JavaFX-Launcher] WARN  c.v.core.security.EncryptionService - No master secret provided; using ephemeral key (secrets won't decrypt across restarts)
+2025-08-14 18:01:43.554 [JavaFX-Launcher] INFO  com.voxstream.core.bus.EventBusImpl - EventBus initialized with bufferSize=10000, threads=8, strategy=DROP_OLDEST
+2025-08-14 18:01:43.556 [JavaFX-Launcher] INFO  c.v.core.persistence.BackupService - BackupService initialized (H2 mode)
+2025-08-14 18:01:43.647 [JavaFX-Launcher] INFO  c.v.frontend.VoxStreamApplication - Spring Application Context initialized successfully
+2025-08-14 18:01:43.660 [JavaFX Application Thread] INFO  c.v.frontend.VoxStreamApplication - Starting JavaFX Application...
+2025-08-14 18:01:43.661 [ForkJoinPool.commonPool-worker-1] INFO  c.v.f.service.ApplicationLauncher - Starting VoxStream application launch sequence...
+2025-08-14 18:01:43.662 [ForkJoinPool.commonPool-worker-1] DEBUG c.v.f.service.ApplicationLauncher - Launch progress: {:.0%} - 0.1
+2025-08-14 18:01:43.663 [ForkJoinPool.commonPool-worker-1] INFO  c.v.core.service.CoreErrorHandler - System requirements validation passed
+2025-08-14 18:01:43.663 [ForkJoinPool.commonPool-worker-1] DEBUG c.v.f.service.ApplicationLauncher - Launch progress: {:.0%} - 0.3
+2025-08-14 18:01:43.663 [ForkJoinPool.commonPool-worker-1] INFO  c.v.f.service.ApplicationLauncher - Initializing core services...
+2025-08-14 18:01:43.663 [ForkJoinPool.commonPool-worker-1] DEBUG c.v.f.service.ApplicationLauncher - Logging system initialized
+2025-08-14 18:01:43.663 [ForkJoinPool.commonPool-worker-1] DEBUG c.v.f.service.ApplicationLauncher - Configuration system initialized
+2025-08-14 18:01:43.664 [ForkJoinPool.commonPool-worker-1] DEBUG c.v.f.service.ApplicationLauncher - Event bus initialized
+2025-08-14 18:01:43.664 [ForkJoinPool.commonPool-worker-1] DEBUG c.v.f.service.ApplicationLauncher - Launch progress: {:.0%} - 0.5
+2025-08-14 18:01:43.664 [ForkJoinPool.commonPool-worker-1] INFO  c.v.f.service.ApplicationLauncher - Initializing platform services...
+2025-08-14 18:01:43.664 [ForkJoinPool.commonPool-worker-1] DEBUG c.v.f.service.ApplicationLauncher - Platform API services initialized
+2025-08-14 18:01:43.664 [ForkJoinPool.commonPool-worker-1] DEBUG c.v.f.service.ApplicationLauncher - TTS services initialized
+2025-08-14 18:01:43.664 [ForkJoinPool.commonPool-worker-1] DEBUG c.v.f.service.ApplicationLauncher - Web output services initialized
+2025-08-14 18:01:43.664 [ForkJoinPool.commonPool-worker-1] DEBUG c.v.f.service.ApplicationLauncher - Launch progress: {:.0%} - 0.7
+2025-08-14 18:01:43.664 [ForkJoinPool.commonPool-worker-1] INFO  c.v.f.service.ApplicationLauncher - Initializing UI components...
+2025-08-14 18:01:43.664 [ForkJoinPool.commonPool-worker-1] DEBUG c.v.f.service.ApplicationLauncher - UI components ready
+2025-08-14 18:01:43.665 [ForkJoinPool.commonPool-worker-1] DEBUG c.v.f.service.ApplicationLauncher - Launch progress: {:.0%} - 0.9
+2025-08-14 18:01:43.665 [ForkJoinPool.commonPool-worker-1] INFO  c.v.f.service.ApplicationLauncher - Finalizing application setup...
+2025-08-14 18:01:43.665 [ForkJoinPool.commonPool-worker-1] DEBUG c.v.f.service.ApplicationLauncher - Application setup finalized
+2025-08-14 18:01:43.665 [ForkJoinPool.commonPool-worker-1] DEBUG c.v.f.service.ApplicationLauncher - Launch progress: {:.0%} - 1.0
+2025-08-14 18:01:43.665 [ForkJoinPool.commonPool-worker-1] INFO  c.v.f.service.ApplicationLauncher - VoxStream application launched successfully
+2025-08-14 18:01:44.278 [JavaFX Application Thread] DEBUG c.v.f.controller.MainController - Connections tab selected
+2025-08-14 18:01:44.345 [JavaFX Application Thread] INFO  c.v.f.controller.MainController - Initializing Main Controller...
+2025-08-14 18:01:44.369 [JavaFX Application Thread] INFO  c.v.f.controller.MainController - Main Controller initialized successfully
+2025-08-14 18:01:45.044 [JavaFX Application Thread] INFO  c.v.frontend.VoxStreamApplication - JavaFX Application started successfully
+2025-08-14 18:02:03.366 [JavaFX Application Thread] DEBUG c.v.f.controller.MainController - Connections tab selected
+2025-08-14 18:02:03.367 [JavaFX Application Thread] DEBUG c.v.f.controller.MainController - Switched to tab: Settings
+2025-08-14 18:02:03.367 [JavaFX Application Thread] DEBUG c.v.f.controller.MainController - Settings tab selected
+2025-08-14 18:02:39.566 [JavaFX Application Thread] DEBUG c.v.f.controller.MainController - Settings tab selected
+2025-08-14 18:02:39.567 [JavaFX Application Thread] DEBUG c.v.f.controller.MainController - Switched to tab: Connections
+2025-08-14 18:02:39.567 [JavaFX Application Thread] DEBUG c.v.f.controller.MainController - Connections tab selected
+2025-08-14 18:02:41.715 [JavaFX Application Thread] INFO  c.v.frontend.VoxStreamApplication - Application close requested
+2025-08-14 18:02:41.720 [JavaFX Application Thread] INFO  c.v.frontend.VoxStreamApplication - Spring Application Context closed
+2025-08-14 18:02:41.740 [JavaFX Application Thread] INFO  c.v.frontend.VoxStreamApplication - Stopping VoxStream Application...
+2025-08-14 18:02:41.740 [JavaFX Application Thread] INFO  c.v.frontend.VoxStreamApplication - Spring Application Context closed
