@@ -117,11 +117,17 @@ VoxStream is a Java-based application with a Java frontend and backend that inte
 > NOTE: Configuration migrations managed via config.schema.version key (Flyway seed + in-code migration runner).
 
 ### 2.4 Advanced Settings Framework
-- [ ] Create settings UI framework
-- [ ] Implement event purge time settings
-- [ ] Add TTS bus purge time settings
-- [ ] Create settings import/export
+- [x] Create settings UI framework
+- [x] Implement event purge time settings
+- [x] Add TTS bus purge time settings
+- [x] Create settings import/export
 - [ ] Add settings validation and defaults
+  - [x] Add numeric range validators (purge intervals, max events, port)
+  - [ ] Implement composite validation (cross-field, dependency rules)
+  - [ ] Add default profile management (save/restore named profiles)
+  - [x] Persist last successful export hash for change detection
+
+> NOTE: Purge interval settings backed by CoreConfigKeys; UI implemented with basic validation (range checks) and import/export JSON support. Validator framework added (numeric ranges). Remaining work: composite validation & default profile management. Export hash now stored in config.lastExportHash and compared to live settings to surface change indicator.
 
 **Testing Phase 2:**
 - [ ] Test event bus performance with high volume

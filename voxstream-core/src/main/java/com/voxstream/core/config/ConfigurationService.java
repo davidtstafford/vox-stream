@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.voxstream.core.config.keys.ConfigKey;
 import com.voxstream.core.config.keys.CoreConfigKeys;
+import com.voxstream.core.config.validation.ConfigValidators;
 import com.voxstream.core.dao.ConfigDao;
 
 /**
@@ -59,14 +60,15 @@ public class ConfigurationService {
     }
 
     private <T> void validate(ConfigKey<T> key, T value) {
-        // Basic validation examples (extend as needed)
+        // Basic null & type checks
         if (value == null)
             throw new IllegalArgumentException("Value for " + key.getName() + " cannot be null");
         if (value instanceof Number) {
-            // example: ensure not negative
             if (((Number) value).longValue() < 0)
                 throw new IllegalArgumentException("Negative value for " + key.getName());
         }
+        // Extended validation
+        ConfigValidators.validate(key, value);
     }
 
     private String serialize(Object v) {

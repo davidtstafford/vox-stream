@@ -184,13 +184,20 @@
                               <HBox spacing="10.0">
                                  <children>
                                     <Label text="Event Purge Time (minutes):" />
-                                    <Spinner prefWidth="80.0" />
+                                    <Spinner fx:id="eventPurgeSpinner" prefWidth="100.0" />
                                  </children>
                               </HBox>
                               <HBox spacing="10.0">
                                  <children>
                                     <Label text="Max Events in Memory:" />
-                                    <Spinner prefWidth="100.0" />
+                                    <Spinner fx:id="maxEventsSpinner" prefWidth="120.0" />
+                                 </children>
+                              </HBox>
+                              <Label style="-fx-font-weight: bold;" text="TTS Bus Settings" />
+                              <HBox spacing="10.0">
+                                 <children>
+                                    <Label text="TTS Purge Time (minutes):" />
+                                    <Spinner fx:id="ttsPurgeSpinner" prefWidth="100.0" />
                                  </children>
                               </HBox>
                               <Separator />
@@ -198,17 +205,17 @@
                               <HBox spacing="10.0">
                                  <children>
                                     <Label text="Port:" />
-                                    <Spinner prefWidth="80.0" />
+                                    <Spinner fx:id="webPortSpinner" prefWidth="100.0" />
                                  </children>
                               </HBox>
-                              <CheckBox mnemonicParsing="false" text="Enable CORS" />
+                              <CheckBox fx:id="enableCorsCheckbox" mnemonicParsing="false" text="Enable CORS" />
                               <Separator />
                               <HBox spacing="10.0">
                                  <children>
-                                    <Button mnemonicParsing="false" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" text="Save Settings" />
-                                    <Button mnemonicParsing="false" text="Reset to Defaults" />
-                                    <Button mnemonicParsing="false" text="Export Settings" />
-                                    <Button mnemonicParsing="false" text="Import Settings" />
+                                    <Button fx:id="saveSettingsButton" mnemonicParsing="false" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" text="Save Settings" onAction="#handleSaveSettings" />
+                                    <Button fx:id="resetDefaultsButton" mnemonicParsing="false" text="Reset to Defaults" onAction="#handleResetDefaults" />
+                                    <Button fx:id="exportSettingsButton" mnemonicParsing="false" text="Export Settings" onAction="#handleExportSettings" />
+                                    <Button fx:id="importSettingsButton" mnemonicParsing="false" text="Import Settings" onAction="#handleImportSettings" />
                                  </children>
                               </HBox>
                            </children>

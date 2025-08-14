@@ -9,51 +9,47 @@
       "name": "voxstream.database",
       "type": "com.voxstream.core.config.VoxStreamConfiguration$Database",
       "sourceType": "com.voxstream.core.config.VoxStreamConfiguration",
-      "sourceMethod": "getDatabase()"
+      "sourceMethod": "public com.voxstream.core.config.VoxStreamConfiguration.Database getDatabase() "
     },
     {
       "name": "voxstream.event-bus",
       "type": "com.voxstream.core.config.VoxStreamConfiguration$EventBus",
       "sourceType": "com.voxstream.core.config.VoxStreamConfiguration",
-      "sourceMethod": "getEventBus()"
+      "sourceMethod": "public com.voxstream.core.config.VoxStreamConfiguration.EventBus getEventBus() "
     },
     {
       "name": "voxstream.tts",
       "type": "com.voxstream.core.config.VoxStreamConfiguration$TTS",
       "sourceType": "com.voxstream.core.config.VoxStreamConfiguration",
-      "sourceMethod": "getTts()"
+      "sourceMethod": "public com.voxstream.core.config.VoxStreamConfiguration.TTS getTts() "
     },
     {
       "name": "voxstream.web-output",
       "type": "com.voxstream.core.config.VoxStreamConfiguration$WebOutput",
       "sourceType": "com.voxstream.core.config.VoxStreamConfiguration",
-      "sourceMethod": "getWebOutput()"
+      "sourceMethod": "public com.voxstream.core.config.VoxStreamConfiguration.WebOutput getWebOutput() "
     }
   ],
   "properties": [
     {
       "name": "voxstream.database.auto-migrate",
       "type": "java.lang.Boolean",
-      "sourceType": "com.voxstream.core.config.VoxStreamConfiguration$Database",
-      "defaultValue": true
+      "sourceType": "com.voxstream.core.config.VoxStreamConfiguration$Database"
     },
     {
       "name": "voxstream.database.path",
       "type": "java.lang.String",
-      "sourceType": "com.voxstream.core.config.VoxStreamConfiguration$Database",
-      "defaultValue": ".\/data\/voxstream.db"
+      "sourceType": "com.voxstream.core.config.VoxStreamConfiguration$Database"
     },
     {
       "name": "voxstream.database.type",
       "type": "java.lang.String",
-      "sourceType": "com.voxstream.core.config.VoxStreamConfiguration$Database",
-      "defaultValue": "H2"
+      "sourceType": "com.voxstream.core.config.VoxStreamConfiguration$Database"
     },
     {
       "name": "voxstream.event-bus.backpressure-strategy",
       "type": "java.lang.String",
-      "sourceType": "com.voxstream.core.config.VoxStreamConfiguration$EventBus",
-      "defaultValue": "DROP_OLDEST"
+      "sourceType": "com.voxstream.core.config.VoxStreamConfiguration$EventBus"
     },
     {
       "name": "voxstream.event-bus.buffer-size",
@@ -63,92 +59,77 @@
     {
       "name": "voxstream.event-bus.dispatcher-threads",
       "type": "java.lang.Integer",
-      "sourceType": "com.voxstream.core.config.VoxStreamConfiguration$EventBus",
-      "defaultValue": 0
+      "sourceType": "com.voxstream.core.config.VoxStreamConfiguration$EventBus"
     },
     {
       "name": "voxstream.event-bus.enable-metrics",
       "type": "java.lang.Boolean",
-      "sourceType": "com.voxstream.core.config.VoxStreamConfiguration$EventBus",
-      "defaultValue": true
+      "sourceType": "com.voxstream.core.config.VoxStreamConfiguration$EventBus"
     },
     {
       "name": "voxstream.event-bus.enable-persistence",
       "type": "java.lang.Boolean",
-      "sourceType": "com.voxstream.core.config.VoxStreamConfiguration$EventBus",
-      "defaultValue": false
+      "sourceType": "com.voxstream.core.config.VoxStreamConfiguration$EventBus"
     },
     {
       "name": "voxstream.event-bus.max-events",
       "type": "java.lang.Integer",
-      "sourceType": "com.voxstream.core.config.VoxStreamConfiguration$EventBus",
-      "defaultValue": 10000
+      "sourceType": "com.voxstream.core.config.VoxStreamConfiguration$EventBus"
     },
     {
       "name": "voxstream.event-bus.purge-interval-minutes",
       "type": "java.lang.Integer",
-      "sourceType": "com.voxstream.core.config.VoxStreamConfiguration$EventBus",
-      "defaultValue": 10
+      "sourceType": "com.voxstream.core.config.VoxStreamConfiguration$EventBus"
     },
     {
       "name": "voxstream.tts.enabled",
       "type": "java.lang.Boolean",
-      "sourceType": "com.voxstream.core.config.VoxStreamConfiguration$TTS",
-      "defaultValue": false
+      "sourceType": "com.voxstream.core.config.VoxStreamConfiguration$TTS"
     },
     {
       "name": "voxstream.tts.max-characters",
       "type": "java.lang.Integer",
-      "sourceType": "com.voxstream.core.config.VoxStreamConfiguration$TTS",
-      "defaultValue": 500
+      "sourceType": "com.voxstream.core.config.VoxStreamConfiguration$TTS"
     },
     {
       "name": "voxstream.tts.max-repeated-chars",
       "type": "java.lang.Integer",
-      "sourceType": "com.voxstream.core.config.VoxStreamConfiguration$TTS",
-      "defaultValue": 3
+      "sourceType": "com.voxstream.core.config.VoxStreamConfiguration$TTS"
     },
     {
       "name": "voxstream.tts.max-repeated-words",
       "type": "java.lang.Integer",
-      "sourceType": "com.voxstream.core.config.VoxStreamConfiguration$TTS",
-      "defaultValue": 3
+      "sourceType": "com.voxstream.core.config.VoxStreamConfiguration$TTS"
     },
     {
       "name": "voxstream.tts.provider",
       "type": "java.lang.String",
-      "sourceType": "com.voxstream.core.config.VoxStreamConfiguration$TTS",
-      "defaultValue": "AWS_POLLY"
+      "sourceType": "com.voxstream.core.config.VoxStreamConfiguration$TTS"
     },
     {
       "name": "voxstream.tts.voice",
       "type": "java.lang.String",
-      "sourceType": "com.voxstream.core.config.VoxStreamConfiguration$TTS",
-      "defaultValue": "Joanna"
+      "sourceType": "com.voxstream.core.config.VoxStreamConfiguration$TTS"
     },
     {
       "name": "voxstream.version",
       "type": "java.lang.String",
-      "sourceType": "com.voxstream.core.config.VoxStreamConfiguration",
-      "defaultValue": "1.0.0-SNAPSHOT"
+      "sourceType": "com.voxstream.core.config.VoxStreamConfiguration"
     },
     {
       "name": "voxstream.web-output.enable-cors",
       "type": "java.lang.Boolean",
-      "sourceType": "com.voxstream.core.config.VoxStreamConfiguration$WebOutput",
-      "defaultValue": true
+      "sourceType": "com.voxstream.core.config.VoxStreamConfiguration$WebOutput"
     },
     {
       "name": "voxstream.web-output.host",
       "type": "java.lang.String",
-      "sourceType": "com.voxstream.core.config.VoxStreamConfiguration$WebOutput",
-      "defaultValue": "localhost"
+      "sourceType": "com.voxstream.core.config.VoxStreamConfiguration$WebOutput"
     },
     {
       "name": "voxstream.web-output.port",
       "type": "java.lang.Integer",
-      "sourceType": "com.voxstream.core.config.VoxStreamConfiguration$WebOutput",
-      "defaultValue": 8080
+      "sourceType": "com.voxstream.core.config.VoxStreamConfiguration$WebOutput"
     }
   ],
   "hints": []
