@@ -4,7 +4,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -44,5 +46,15 @@ public class JdbcConfigDao implements ConfigDao {
     @Override
     public void delete(String key) {
         jdbcTemplate.update("DELETE FROM app_config WHERE cfg_key=?", key);
+    }
+
+    @Override
+    public Map<String, String> all() {
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT cfg_key, cfg_value FROM app_config");
+        Map<String, String> result = new HashMap<>();
+        for (Map<String, Object> r : rows) {
+            result.put((String) r.get("cfg_key"), (String) r.get("cfg_value"));
+        }
+        return result;
     }
 }
