@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  voxstream-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/workspace
+      - m2_cache:/root/.m2
+    ports:
+      - "8080:8080" # Web output port
+      - "5005:5005" # Debug port
+    environment:
+      - JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
+      - MAVEN_OPTS=-Xmx1024m
+    command: [ "./mvnw", "spring-boot:run", "-Dspring-boot.run.profiles=dev" ]
+  # Optional: Database for development (if needed later)
+  # voxstream-db:
+  #   image: postgres:15-alpine
+  #   environment:
+  #     POSTGRES_DB: voxstream
+  #     POSTGRES_USER: voxstream
+  #     POSTGRES_PASSWORD: development
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  m2_cache: # postgres_data:

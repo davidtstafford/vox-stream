@@ -1,0 +1,76 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Build VoxStream",
+			"type": "shell",
+			"command": "./mvnw",
+			"args": [
+				"clean",
+				"compile"
+			],
+			"group": "build",
+			"problemMatcher": [
+				"$gcc"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "Test VoxStream",
+			"type": "shell",
+			"command": "./mvnw",
+			"args": [
+				"test"
+			],
+			"group": "test",
+			"problemMatcher": [
+				"$gcc"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "Package VoxStream",
+			"type": "shell",
+			"command": "./mvnw",
+			"args": [
+				"clean",
+				"package"
+			],
+			"group": "build",
+			"problemMatcher": [
+				"$gcc"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "Run VoxStream",
+			"type": "shell",
+			"command": "./mvnw",
+			"args": [
+				"javafx:run"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}/voxstream-frontend"
+			},
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "Clean VoxStream",
+			"type": "shell",
+			"command": "./mvnw",
+			"args": [
+				"clean"
+			],
+			"group": "build",
+			"problemMatcher": [],
+			"isBackground": false
+		}
+	]
+}

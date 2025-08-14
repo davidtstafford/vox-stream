@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane fx:id="rootPane" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.voxstream.frontend.controller.MainController">
+   <top>
+      <VBox>
+         <children>
+            <MenuBar fx:id="menuBar">
+              <menus>
+                <Menu mnemonicParsing="false" text="File">
+                  <items>
+                    <MenuItem mnemonicParsing="false" text="Close" />
+                  </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Edit">
+                  <items>
+                    <MenuItem mnemonicParsing="false" text="Delete" />
+                  </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Help">
+                  <items>
+                    <MenuItem mnemonicParsing="false" text="About" />
+                  </items>
+                </Menu>
+              </menus>
+            </MenuBar>
+         </children>
+      </VBox>
+   </top>
+   <center>
+      <TabPane fx:id="mainTabPane" tabClosingPolicy="UNAVAILABLE">
+        <tabs>
+          <Tab fx:id="connectionsTab" onSelectionChanged="#handleConnectionsTab" text="Connections">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0">
+                     <children>
+                        <VBox alignment="CENTER" spacing="20.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <children>
+                              <Label style="-fx-font-size: 24px; -fx-font-weight: bold;" text="Platform Connections" />
+                              <Label text="Configure your streaming platform connections here." />
+                              <Button mnemonicParsing="false" prefHeight="40.0" prefWidth="200.0" style="-fx-font-size: 14px;" text="Add Twitch Connection" />
+                              <Separator />
+                              <TableView prefHeight="300.0" prefWidth="600.0">
+                                <columns>
+                                  <TableColumn prefWidth="150.0" text="Platform" />
+                                  <TableColumn prefWidth="200.0" text="Username" />
+                                    <TableColumn prefWidth="100.0" text="Status" />
+                                    <TableColumn prefWidth="150.0" text="Actions" />
+                                </columns>
+                              </TableView>
+                           </children>
+                           <padding>
+                              <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                           </padding>
+                        </VBox>
+                     </children>
+                  </AnchorPane>
+            </content>
+          </Tab>
+          <Tab fx:id="eventsTab" onSelectionChanged="#handleEventsTab" text="Live Events">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0">
+                     <children>
+                        <VBox alignment="CENTER" spacing="20.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <children>
+                              <Label style="-fx-font-size: 24px; -fx-font-weight: bold;" text="Live Events Monitor" />
+                              <Label text="View real-time events from connected platforms." />
+                              <HBox alignment="CENTER" spacing="10.0">
+                                 <children>
+                                    <Button mnemonicParsing="false" text="Start Monitoring" />
+                                    <Button mnemonicParsing="false" text="Stop Monitoring" />
+                                    <Button mnemonicParsing="false" text="Clear Events" />
+                                 </children>
+                              </HBox>
+                              <TableView prefHeight="400.0" prefWidth="800.0">
+                                <columns>
+                                  <TableColumn prefWidth="100.0" text="Time" />
+                                  <TableColumn prefWidth="100.0" text="Platform" />
+                                    <TableColumn prefWidth="120.0" text="Event Type" />
+                                    <TableColumn prefWidth="150.0" text="User" />
+                                    <TableColumn prefWidth="330.0" text="Details" />
+                                </columns>
+                              </TableView>
+                           </children>
+                           <padding>
+                              <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                           </padding>
+                        </VBox>
+                     </children>
+                  </AnchorPane>
+            </content>
+          </Tab>
+            <Tab fx:id="ttsTab" onSelectionChanged="#handleTTSTab" text="Text-to-Speech">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0">
+                     <children>
+                        <VBox alignment="TOP_LEFT" spacing="20.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <children>
+                              <Label style="-fx-font-size: 24px; -fx-font-weight: bold;" text="Text-to-Speech Configuration" />
+                              <CheckBox mnemonicParsing="false" text="Enable Text-to-Speech" />
+                              <HBox spacing="10.0">
+                                 <children>
+                                    <Label text="TTS Provider:" />
+                                    <ComboBox prefWidth="200.0" promptText="Select Provider" />
+                                 </children>
+                              </HBox>
+                              <HBox spacing="10.0">
+                                 <children>
+                                    <Label text="Voice:" />
+                                    <ComboBox prefWidth="200.0" promptText="Select Voice" />
+                                 </children>
+                              </HBox>
+                              <Button mnemonicParsing="false" text="Test TTS" />
+                              <Separator />
+                              <Label style="-fx-font-weight: bold;" text="Filter Settings" />
+                              <HBox spacing="10.0">
+                                 <children>
+                                    <Label text="Max Repeated Characters:" />
+                                    <Spinner prefWidth="80.0" />
+                                 </children>
+                              </HBox>
+                              <HBox spacing="10.0">
+                                 <children>
+                                    <Label text="Max Repeated Words:" />
+                                    <Spinner prefWidth="80.0" />
+                                 </children>
+                              </HBox>
+                              <CheckBox mnemonicParsing="false" text="Read viewer names" />
+                              <CheckBox mnemonicParsing="false" text="Read message content only" />
+                           </children>
+                           <padding>
+                              <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                           </padding>
+                        </VBox>
+                     </children>
+                  </AnchorPane>
+              </content>
+            </Tab>
+            <Tab fx:id="viewersTab" onSelectionChanged="#handleViewersTab" text="Viewers">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0">
+                     <children>
+                        <VBox alignment="CENTER" spacing="20.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <children>
+                              <Label style="-fx-font-size: 24px; -fx-font-weight: bold;" text="Viewer Management" />
+                              <HBox alignment="CENTER" spacing="10.0">
+                                 <children>
+                                    <TextField promptText="Search viewers..." />
+                                    <Button mnemonicParsing="false" text="Search" />
+                                    <Button mnemonicParsing="false" text="Refresh" />
+                                 </children>
+                              </HBox>
+                              <TableView prefHeight="400.0" prefWidth="800.0">
+                                <columns>
+                                  <TableColumn prefWidth="150.0" text="Username" />
+                                  <TableColumn prefWidth="100.0" text="Platform" />
+                                    <TableColumn prefWidth="100.0" text="Role" />
+                                    <TableColumn prefWidth="100.0" text="TTS Enabled" />
+                                    <TableColumn prefWidth="100.0" text="Chat Visible" />
+                                    <TableColumn prefWidth="150.0" text="Last Seen" />
+                                    <TableColumn prefWidth="100.0" text="Actions" />
+                                </columns>
+                              </TableView>
+                           </children>
+                           <padding>
+                              <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                           </padding>
+                        </VBox>
+                     </children>
+                  </AnchorPane>
+              </content>
+            </Tab>
+            <Tab fx:id="settingsTab" onSelectionChanged="#handleSettingsTab" text="Settings">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0">
+                     <children>
+                        <VBox alignment="TOP_LEFT" spacing="20.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <children>
+                              <Label style="-fx-font-size: 24px; -fx-font-weight: bold;" text="Application Settings" />
+                              <Label style="-fx-font-weight: bold;" text="Event Bus Settings" />
+                              <HBox spacing="10.0">
+                                 <children>
+                                    <Label text="Event Purge Time (minutes):" />
+                                    <Spinner prefWidth="80.0" />
+                                 </children>
+                              </HBox>
+                              <HBox spacing="10.0">
+                                 <children>
+                                    <Label text="Max Events in Memory:" />
+                                    <Spinner prefWidth="100.0" />
+                                 </children>
+                              </HBox>
+                              <Separator />
+                              <Label style="-fx-font-weight: bold;" text="Web Output Settings" />
+                              <HBox spacing="10.0">
+                                 <children>
+                                    <Label text="Port:" />
+                                    <Spinner prefWidth="80.0" />
+                                 </children>
+                              </HBox>
+                              <CheckBox mnemonicParsing="false" text="Enable CORS" />
+                              <Separator />
+                              <HBox spacing="10.0">
+                                 <children>
+                                    <Button mnemonicParsing="false" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" text="Save Settings" />
+                                    <Button mnemonicParsing="false" text="Reset to Defaults" />
+                                    <Button mnemonicParsing="false" text="Export Settings" />
+                                    <Button mnemonicParsing="false" text="Import Settings" />
+                                 </children>
+                              </HBox>
+                           </children>
+                           <padding>
+                              <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                           </padding>
+                        </VBox>
+                     </children>
+                  </AnchorPane>
+              </content>
+            </Tab>
+        </tabs>
+      </TabPane>
+   </center>
+   <bottom>
+      <HBox alignment="CENTER_LEFT" spacing="10.0" style="-fx-background-color: #f0f0f0; -fx-border-color: #cccccc; -fx-border-width: 1 0 0 0;">
+         <children>
+            <ProgressIndicator fx:id="statusIndicator" />
+            <Label fx:id="statusLabel" text="Ready" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Label text="VoxStream v1.0.0" />
+         </children>
+         <padding>
+            <Insets bottom="5.0" left="10.0" right="10.0" top="5.0" />
+         </padding>
+      </HBox>
+   </bottom>
+</BorderPane>

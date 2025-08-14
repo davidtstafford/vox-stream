@@ -1,0 +1,57 @@
+/* VoxStream Preloader Styles - macOS Catalina+ Compatible */
+
+.splash-container {
+    -fx-background-color: linear-gradient(to bottom, #f8f9fa, #e9ecef);
+    -fx-padding: 40;
+    -fx-spacing: 20;
+    -fx-alignment: center;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 10, 0.2, 0, 2);
+}
+
+.logo-text {
+    -fx-font-family: "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+    -fx-font-size: 32px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #007AFF;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 2, 0.3, 0, 1);
+}
+
+.title {
+    -fx-font-family: "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+    -fx-font-size: 24px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #1d1d1f;
+}
+
+.version {
+    -fx-font-family: "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+    -fx-font-size: 12px;
+    -fx-text-fill: #6e6e73;
+}
+
+.progress {
+    -fx-accent: #007AFF;
+    -fx-background-color: #e5e5e7;
+    -fx-background-radius: 4;
+    -fx-padding: 4;
+}
+
+.progress .bar {
+    -fx-background-color: linear-gradient(to right, #007AFF, #5AC8FA);
+    -fx-background-radius: 3;
+    -fx-background-insets: 1;
+}
+
+.progress .track {
+    -fx-background-color: #f2f2f7;
+    -fx-background-radius: 3;
+    -fx-background-insets: 1;
+}
+
+.status {
+    -fx-font-family: "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+    -fx-font-size: 14px;
+    -fx-text-fill: #6e6e73;
+    -fx-text-alignment: center;
+}

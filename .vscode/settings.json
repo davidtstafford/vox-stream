@@ -1,0 +1,25 @@
+{
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.compile.nullAnalysis.mode": "automatic",
+    "java.saveActions.organizeImports": true,
+    "java.debug.settings.onBuildFailureProceed": false,
+    "maven.executable.path": "./mvnw",
+    "files.exclude": {
+        "**/target": true,
+        "**/.settings": true,
+        "**/.project": true,
+        "**/.classpath": true,
+        "**/.factorypath": true
+    },
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "explicit"
+    },
+    "java.test.config": {
+        "name": "VoxStream Test Config",
+        "workingDirectory": "${workspaceFolder}",
+        "args": [
+            "-Djava.awt.headless=true"
+        ]
+    }
+}

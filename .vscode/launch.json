@@ -1,0 +1,34 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Launch VoxStream Application",
+            "request": "launch",
+            "mainClass": "com.voxstream.frontend.VoxStreamApplication",
+            "projectName": "voxstream-frontend",
+            "args": [],
+            "vmArgs": [
+                "-Djava.awt.headless=false",
+                "-Dspring.profiles.active=dev"
+            ]
+        },
+        {
+            "type": "java",
+            "name": "Debug VoxStream Tests",
+            "request": "launch",
+            "mainClass": "",
+            "projectName": "voxstream-frontend",
+            "vmArgs": [
+                "-Djava.awt.headless=true"
+            ]
+        },
+        {
+            "type": "java",
+            "name": "Attach to Docker",
+            "request": "attach",
+            "hostName": "localhost",
+            "port": 5005
+        }
+    ]
+}
