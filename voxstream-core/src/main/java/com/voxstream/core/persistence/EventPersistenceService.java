@@ -62,7 +62,8 @@ public class EventPersistenceService {
         try {
             jdbcTemplate.update(
                     "INSERT INTO events (id, type, source_platform, created_at, expires_at, importance, correlation_id, payload) VALUES (?,?,?,?,?,?,?,?)",
-                    event.getId(), event.getType().name(), event.getSourcePlatform(), Timestamp.from(event.getTimestamp()),
+                    event.getId(), event.getType().name(), event.getSourcePlatform(),
+                    Timestamp.from(event.getTimestamp()),
                     event.getMetadata() != null && event.getMetadata().getExpiresAt().isPresent()
                             ? Timestamp.from(event.getMetadata().getExpiresAt().get())
                             : null,

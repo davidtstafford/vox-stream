@@ -123,7 +123,9 @@ public class EventBusImpl implements EventBus, DisposableBean {
         if (configuration.getEventBus().isEnablePersistence()) {
             try {
                 persistenceService.save(event);
+                metrics.incPersistenceSuccess();
             } catch (Exception e) {
+                metrics.incPersistenceFailure();
                 coreErrorHandler.handleError("Persistence save failed", e);
             }
         }

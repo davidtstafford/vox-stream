@@ -20,7 +20,8 @@ public class BaseEvent implements Event {
         this(Event.newId(), type, Instant.now(), sourcePlatform, payload, metadata);
     }
 
-    // Added constructor allowing explicit timestamp (used for persistence rehydration)
+    // Added constructor allowing explicit timestamp (used for persistence
+    // rehydration)
     public BaseEvent(String id, EventType type, Instant timestamp, String sourcePlatform, Map<String, Object> payload,
             EventMetadata metadata) {
         this.id = Objects.requireNonNull(id);
