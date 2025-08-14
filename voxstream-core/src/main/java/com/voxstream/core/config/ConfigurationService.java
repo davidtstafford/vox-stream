@@ -72,6 +72,21 @@ public class ConfigurationService {
         }
     }
 
+    // Exposed for profile service to capture raw values without validation
+    public Object getUncheckedForProfile(ConfigKey<?> key) {
+        return getUnchecked(key);
+    }
+
+    // Convenience: current config snapshot (excluding internal filtering done by
+    // caller)
+    public Map<ConfigKey<?>, Object> getAllCurrent() {
+        Map<ConfigKey<?>, Object> map = new HashMap<>();
+        for (var k : CoreConfigKeys.ALL) {
+            map.put(k, get(k));
+        }
+        return map;
+    }
+
     private Object getUnchecked(ConfigKey<?> key) {
         return cache.computeIfAbsent(key.getName(), n -> loadOrDefaultUnchecked(key));
     }
@@ -111,7 +126,6 @@ public class ConfigurationService {
                 throw new IllegalArgumentException("Negative value for " + key.getName());
         }
         // Extended validation
-        @SuppressWarnings("unchecked")
         ConfigKey<T> cast = (ConfigKey<T>) key;
         ConfigValidators.validate(cast, cast.getType().cast(value));
     }
