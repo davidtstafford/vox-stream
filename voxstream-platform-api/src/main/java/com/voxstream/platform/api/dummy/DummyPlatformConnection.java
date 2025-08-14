@@ -28,7 +28,8 @@ public class DummyPlatformConnection implements PlatformConnection {
     private final List<Consumer<PlatformStatus>> listeners = new CopyOnWriteArrayList<>();
     private volatile String sessionId;
 
-    // Failure injection: a sequence of booleans indicating success (true) or failure (false) for successive connect attempts
+    // Failure injection: a sequence of booleans indicating success (true) or
+    // failure (false) for successive connect attempts
     private volatile List<Boolean> scriptedOutcomes = List.of();
     private volatile int outcomeIndex = 0;
     private volatile long simulatedLatencyMs = 250;
@@ -42,10 +43,14 @@ public class DummyPlatformConnection implements PlatformConnection {
     }
 
     /** Adjust artificial latency for connect attempts. */
-    public void setSimulatedLatencyMs(long ms) { this.simulatedLatencyMs = ms; }
+    public void setSimulatedLatencyMs(long ms) {
+        this.simulatedLatencyMs = ms;
+    }
 
     /** Toggle synthetic platform event emission (future hook). */
-    public void setEmitSyntheticEvents(boolean enable) { this.emitSyntheticEvents = enable; }
+    public void setEmitSyntheticEvents(boolean enable) {
+        this.emitSyntheticEvents = enable;
+    }
 
     @Override
     public CompletableFuture<Boolean> connect() {

@@ -43,14 +43,16 @@ public class PlatformConnectionManager {
     });
     private final AtomicBoolean started = new AtomicBoolean(false);
 
-    public PlatformConnectionManager(PlatformConnectionRegistry registry, ConfigurationService config, EventBus eventBus) {
+    public PlatformConnectionManager(PlatformConnectionRegistry registry, ConfigurationService config,
+            EventBus eventBus) {
         this.registry = registry;
         this.config = config;
         this.eventBus = eventBus;
     }
 
     public void start() {
-        if (!started.compareAndSet(false, true)) return;
+        if (!started.compareAndSet(false, true))
+            return;
         if (!config.get(CoreConfigKeys.PLATFORM_ENABLED)) {
             log.info("Platform connections globally disabled");
             return;
@@ -60,7 +62,8 @@ public class PlatformConnectionManager {
     }
 
     public void shutdown() {
-        if (!started.compareAndSet(true, false)) return;
+        if (!started.compareAndSet(true, false))
+            return;
         scheduler.shutdownNow();
         states.values().forEach(s -> {
             PlatformConnection c = s.connection;
@@ -70,7 +73,8 @@ public class PlatformConnectionManager {
                 } else {
                     c.disconnect();
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         });
         log.info("PlatformConnectionManager shutdown complete");
     }
@@ -104,7 +108,8 @@ public class PlatformConnectionManager {
     }
 
     private void scheduleReconnect(ConnState state, int nextAttempt, int previousDelayMs) {
-        if (!started.get()) return;
+        if (!started.get())
+            return;
         int maxAttempts = config.get(CoreConfigKeys.PLATFORM_RECONNECT_MAX_ATTEMPTS);
         if (maxAttempts != -1 && nextAttempt > maxAttempts) {
             log.warn("[{}] Max reconnect attempts reached -> giving up", state.connection.platformId());
@@ -159,10 +164,20 @@ public class PlatformConnectionManager {
         volatile PlatformStatus lastStatus = PlatformStatus.disconnected();
         long lastSuccessfulConnectEpochMs = 0L; // now referenced in publishStatusEvent
         final Metrics metrics = new Metrics();
-        ConnState(PlatformConnection c) { this.connection = c; }
-        void resetBackoff() { metrics.currentBackoffMs = 0; }
+
+        ConnState(PlatformConnection c) {
+            this.connection = c;
+        }
+
+        void resetBackoff() {
+            metrics.currentBackoffMs = 0;
+        }
     }
 
     public static class Metrics {
-        public long connects; public long disconnects; public long failedAttempts; public int currentBackoffMs; }
+        public long connects;
+        public long disconnects;
+        public long failedAttempts;
+        public int currentBackoffMs;
+    }
 }
