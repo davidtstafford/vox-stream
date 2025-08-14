@@ -223,12 +223,19 @@ public class ProfileService {
             String key = stripQuotes(kv[0].trim());
             String valRaw = kv[1].trim();
             Object val;
-            if (valRaw.equalsIgnoreCase("true") || valRaw.equalsIgnoreCase("false"))
+            if (valRaw.equalsIgnoreCase("true") || valRaw.equalsIgnoreCase("false")) {
                 val = Boolean.valueOf(valRaw);
-            else if (valRaw.matches("-?\\d+"))
-                val = Integer.valueOf(valRaw);
-            else
+            } else if (valRaw.matches("-?\\d+")) { // integer
+                try {
+                    val = Integer.valueOf(valRaw);
+                } catch (NumberFormatException nfe) {
+                    val = Long.valueOf(valRaw);
+                }
+            } else if (valRaw.matches("-?\\d+\\.\\d+")) { // floating point
+                val = Double.valueOf(valRaw);
+            } else {
                 val = stripQuotes(valRaw);
+            }
             result.put(key, val);
         }
         return result;
@@ -243,6 +250,8 @@ public class ProfileService {
     private Object castValue(Object raw, Class<?> type) {
         if (type == Integer.class && raw instanceof Number)
             return ((Number) raw).intValue();
+        if (type == Double.class && raw instanceof Number)
+            return ((Number) raw).doubleValue();
         if (type == Boolean.class && raw instanceof Boolean)
             return raw;
         if (type == String.class)

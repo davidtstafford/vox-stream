@@ -153,31 +153,33 @@ VoxStream is a Java-based application with a Java frontend and backend that inte
   - [x] Define event emission contract (PlatformEvent -> internal Event mapping hook) // initial placeholder (mapping hook to implement with first real platform)
   - [x] Add healthCheck() optional method
 - [x] Create platform configuration models
-  - [x] Add config keys: platform.enabled, reconnect.initialDelayMs, reconnect.maxDelayMs, reconnect.maxAttempts (-1=infinite), heartbeat.intervalSec
-  - [x] Implement validators for new keys (ranges, relationships: initial < max, positive intervals)
+  - [x] Add config keys: platform.enabled, reconnect.initialDelayMs, reconnect.maxDelayMs, reconnect.maxAttempts (-1=infinite), heartbeat.intervalSec, reconnect.jitterPercent
+  - [x] Implement validators for new keys (ranges, relationships: initial < max, positive intervals, jitter 0.0-0.5)
   - [x] Profile support: include new keys in export/import & checksum
-- [ ] Implement connection management system
+- [x] Implement connection management system
   - [x] PlatformConnectionManager orchestrating factories, active connections, lifecycle (initial implementation)
   - [x] Track per-connection state machine (DISCONNECTED, CONNECTING, CONNECTED, FAILED, RECONNECT_SCHEDULED)
   - [x] Publish state change events onto EventBus (internal System event type extension)
   - [x] Persistence of last successful connection timestamp (in-memory; consider durable persistence later)
-- [ ] Add auto-reconnection logic
-  - [ ] Exponential backoff with jitter (current: doubling without jitter)
-  - [ ] Distinguish transient vs fatal errors
+- [x] Add auto-reconnection logic
+  - [x] Exponential backoff with jitter (configurable reconnect.jitterPercent)
+  - [x] Distinguish transient vs fatal errors (fatal stops further reconnect attempts)
   - [ ] Reset backoff on successful connect duration threshold
-  - [ ] Tests with DummyPlatformConnection injecting failures sequence
+  - [ ] Additional tests with extended DummyPlatformConnection failure scripts
 - [ ] Create connection status monitoring
   - [x] Metrics: connects, disconnects, failedAttempts, currentBackoffMs
   - [x] Snapshot API exposed via manager
   - [ ] Periodic log summary (config flag)
 - [ ] Enhance DummyPlatformConnection for testing
-  - [ ] Simulate connect latency & failure injection script
-  - [ ] Toggle to emit synthetic platform events (chat message heartbeat)
+  - [x] Simulate connect latency & failure injection script (incl. fatal markers)
+  - [ ] Toggle to emit synthetic platform events (chat message / heartbeat)
   - [ ] Expose controllable clock or hooks for tests
 - [ ] Tests
-  - [ ] Manager lifecycle (start, connect all enabled, shutdown)
-  - [ ] Auto-reconnect success after transient failures
+  - [x] Manager lifecycle (start, connect all enabled, shutdown)
+  - [x] Auto-reconnect success after transient failures
   - [ ] Backoff growth & reset assertions
+  - [ ] Jitter application within expected +/- range
+  - [ ] Fatal failure stops reconnection attempts
   - [ ] Status event propagation to EventBus subscribers
   - [x] Validation of new config keys (boundary, composite)
 

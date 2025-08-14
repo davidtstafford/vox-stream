@@ -102,8 +102,16 @@ public class PlatformConnectionManager {
             } else {
                 state.metrics.failedAttempts++;
                 String msg = ex != null ? ex.getMessage() : "failed";
-                updateStatus(state, PlatformStatus.failed(msg));
-                scheduleReconnect(state, attempt + 1, currentDelayMs);
+                PlatformStatus failedStatus = (ex != null && ex.getMessage() != null
+                        && ex.getMessage().contains("fatal"))
+                                ? PlatformStatus.failed(msg, true)
+                                : PlatformStatus.failed(msg);
+                updateStatus(state, failedStatus);
+                if (failedStatus.fatal()) {
+                    log.warn("[{}] Fatal failure -> not scheduling reconnect", id);
+                } else {
+                    scheduleReconnect(state, attempt + 1, currentDelayMs);
+                }
             }
         });
     }
