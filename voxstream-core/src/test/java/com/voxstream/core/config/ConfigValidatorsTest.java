@@ -21,7 +21,8 @@ class ConfigValidatorsTest {
     @BeforeEach
     void setup() {
         JdbcDataSource ds = new JdbcDataSource();
-        ds.setURL("jdbc:h2:mem:cfg-val-test-" + System.nanoTime() + ";DB_CLOSE_DELAY=-1"); // unique DB per test, keep alive
+        ds.setURL("jdbc:h2:mem:cfg-val-test-" + System.nanoTime() + ";DB_CLOSE_DELAY=-1"); // unique DB per test, keep
+                                                                                           // alive
         ds.setUser("sa");
         ds.setPassword("");
         JdbcTemplate jdbc = new JdbcTemplate(ds);
