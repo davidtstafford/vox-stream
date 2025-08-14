@@ -15,13 +15,16 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
 import com.voxstream.core.dao.ConfigDao;
+import com.voxstream.core.security.EncryptionService;
 
 @Repository
 public class JdbcConfigDao implements ConfigDao {
     private final JdbcTemplate jdbcTemplate;
+    private final EncryptionService encryptionService;
 
-    public JdbcConfigDao(JdbcTemplate jdbcTemplate) {
+    public JdbcConfigDao(JdbcTemplate jdbcTemplate, EncryptionService encryptionService) {
         this.jdbcTemplate = jdbcTemplate;
+        this.encryptionService = encryptionService;
     }
 
     private static final RowMapper<String> VALUE_MAPPER = new RowMapper<String>() {
@@ -33,6 +36,11 @@ public class JdbcConfigDao implements ConfigDao {
 
     @Override
     public void put(String key, String value) {
+        boolean secure = key.toLowerCase().contains("secret") || key.toLowerCase().contains("token")
+                || key.toLowerCase().contains("password");
+        if (secure && value != null && !encryptionService.isEncrypted(value)) {
+            value = encryptionService.encrypt(value);
+        }
         jdbcTemplate.update("MERGE INTO app_config (cfg_key, cfg_value, updated_at) KEY(cfg_key) VALUES (?,?,?)", key,
                 value, Timestamp.from(Instant.now()));
     }
@@ -40,7 +48,7 @@ public class JdbcConfigDao implements ConfigDao {
     @Override
     public Optional<String> get(String key) {
         List<String> list = jdbcTemplate.query("SELECT cfg_value FROM app_config WHERE cfg_key=?", VALUE_MAPPER, key);
-        return list.stream().findFirst();
+        return list.stream().findFirst().map(v -> encryptionService.isEncrypted(v) ? encryptionService.decrypt(v) : v);
     }
 
     @Override
@@ -53,7 +61,9 @@ public class JdbcConfigDao implements ConfigDao {
         List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT cfg_key, cfg_value FROM app_config");
         Map<String, String> result = new HashMap<>();
         for (Map<String, Object> r : rows) {
-            result.put((String) r.get("cfg_key"), (String) r.get("cfg_value"));
+            String raw = (String) r.get("cfg_value");
+            String val = encryptionService.isEncrypted(raw) ? "***" : raw; // mask secrets in bulk listing
+            result.put((String) r.get("cfg_key"), val);
         }
         return result;
     }

@@ -105,14 +105,16 @@ VoxStream is a Java-based application with a Java frontend and backend that inte
 - [x] Create database schema for configuration
 - [x] Implement DAO pattern for data access
 - [x] Add database migration system
-- [ ] Implement data backup and restore
+- [x] Implement data backup and restore
 
 ### 2.3 Configuration Management
-- [ ] Create configuration model classes
-- [ ] Implement configuration persistence
-- [ ] Create configuration validation
-- [ ] Add configuration migration support
-- [ ] Implement secure credential storage
+- [x] Create configuration model classes
+- [x] Implement configuration persistence
+- [x] Create configuration validation
+- [x] Add configuration migration support
+- [x] Implement secure credential storage
+
+> NOTE: Configuration migrations managed via config.schema.version key (Flyway seed + in-code migration runner).
 
 ### 2.4 Advanced Settings Framework
 - [ ] Create settings UI framework
