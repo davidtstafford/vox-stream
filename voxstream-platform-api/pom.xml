@@ -15,26 +15,25 @@
     <description>Streaming platform integrations (Twitch, etc.)</description>
 
     <dependencies>
-        <!-- VoxStream Core -->
-        <dependency>
-            <groupId>com.voxstream</groupId>
-            <artifactId>voxstream-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <!-- Spring Context -->
+        <!-- Spring Context (for @Component discovery in factories) -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
         </dependency>
 
-        <!-- HTTP Client -->
+        <!-- Logging -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+        <!-- HTTP Client (future platform calls) -->
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
         </dependency>
 
-        <!-- WebSocket -->
+        <!-- WebSocket (future real-time events) -->
         <dependency>
             <groupId>org.java-websocket</groupId>
             <artifactId>Java-WebSocket</artifactId>

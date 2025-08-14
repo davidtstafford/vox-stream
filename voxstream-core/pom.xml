@@ -72,6 +72,13 @@
             <artifactId>slf4j-api</artifactId>
         </dependency>
 
+        <!-- Platform API (for platform connection interfaces) -->
+        <dependency>
+            <groupId>com.voxstream</groupId>
+            <artifactId>voxstream-platform-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- Testing -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>

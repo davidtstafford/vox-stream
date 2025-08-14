@@ -1,6 +1,8 @@
 /Users/davidstafford/git/vox-stream/voxstream-core/src/test/java/com/voxstream/core/config/ConfigValidatorsTest.java
 /Users/davidstafford/git/vox-stream/voxstream-core/src/test/java/com/voxstream/core/config/profile/ProfileServiceTest.java
 /Users/davidstafford/git/vox-stream/voxstream-core/src/test/java/com/voxstream/core/bus/EventBusImplTest.java
+/Users/davidstafford/git/vox-stream/voxstream-core/src/test/java/com/voxstream/core/platform/PlatformConnectionRegistryTest.java
 /Users/davidstafford/git/vox-stream/voxstream-core/src/test/java/com/voxstream/core/dao/JdbcViewerDaoTest.java
+/Users/davidstafford/git/vox-stream/voxstream-core/src/test/java/com/voxstream/core/bus/EventBusLoadTest.java
 /Users/davidstafford/git/vox-stream/voxstream-core/src/test/java/com/voxstream/core/config/export/ConfigExportUtilTest.java
 /Users/davidstafford/git/vox-stream/voxstream-core/src/test/java/com/voxstream/core/dao/JdbcConfigDaoTest.java

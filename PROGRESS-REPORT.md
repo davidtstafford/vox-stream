@@ -50,7 +50,8 @@ VoxStream is a comprehensive Java application for streaming platform integration
 - ✅ Logging configuration with Logback
 
 ## 🔄 Current Issue
-The application has a minor logging compatibility issue with Logback and JavaFX runtime. This is being resolved with dependency updates.
+Resolved: Previous logging compatibility concern addressed via updated logback configuration (removed deprecated FNATP).
+No active blocking issues.
 
 ## ✅ Phase 2 Progress
 ### 2.1 Event Bus System
@@ -101,17 +102,21 @@ The application has a minor logging compatibility issue with Logback and JavaFX 
   - JdbcConfigDaoTest (isolation & schema creation)
 - ✅ Successful module + reactor Maven build
 - ✅ Verified JavaFX UI launches, tabs functional, clean shutdown
+- ✅ Platform API scaffold + dummy connection + registry wiring (Phase 3 pre-work)
+- ✅ Resolved cyclic dependency by decoupling platform-api from core
 
 ## 🧪 Testing Summary
 - Core tests passing (16/16 in core module at last run)
 - Validation & profile logic covered by dedicated tests
 - Manual UI verification performed (settings edits, profile operations, import/export)
+- Pending: Add PlatformConnectionRegistry test (dummy connect/disconnect)
 
 ## 🔄 Pending / Minor Tasks
 - Optimize shutdown logging (duplicate prevented with atomic guard) ✅
 - Evaluate removal of explicit @Import(JacksonConfig) (now removed, component scan works) ✅
-- Provide refined Logback configuration (FNATP deprecation cleanup) ⏳
+- Provide refined Logback configuration (FNATP deprecation cleanup) ✅
 - Performance/load tests for event bus volume (Phase 2 stretch) ⏳
+- Add PlatformConnectionRegistry + Dummy connection test ⏳
 
 ## 📁 Project Structure (Unchanged High-Level)
 ```
@@ -145,10 +150,11 @@ vox-stream/
 - ✅ Deterministic configuration export enables reliable change detection
 
 ## 🎯 Next Immediate Steps
-1. Replace deprecated SizeAndTimeBasedFNATP with current triggering policy, finalize logback.xml
-2. Add tests for composite validation failure scenarios (edge cases)
-3. Begin Phase 3: Platform Connection Framework design
-4. Introduce performance benchmarks for event bus under configurable load
+1. Add extended composite validation edge-case tests (already covered core rules; add boundary value tests)
+2. Implement lightweight event bus load benchmark harness
+3. Begin Phase 3: Platform Connection Framework design scaffold (interfaces + models)
+4. Add packaging target (fat jar or jpackage prototype)
+5. Add headless (Monocle) smoke test for JavaFX + Spring init (CI friendly)
 
 ## 🛠️ Technical Stack (Updated Highlights)
 - Java 17

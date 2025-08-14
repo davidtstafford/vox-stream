@@ -25,6 +25,7 @@
 /Users/davidstafford/git/vox-stream/voxstream-core/src/main/java/com/voxstream/core/config/validation/CompositeConfigValidators.java
 /Users/davidstafford/git/vox-stream/voxstream-core/src/main/java/com/voxstream/core/config/keys/CoreConfigKeys.java
 /Users/davidstafford/git/vox-stream/voxstream-core/src/main/java/com/voxstream/core/config/validation/ConfigValidators.java
+/Users/davidstafford/git/vox-stream/voxstream-core/src/main/java/com/voxstream/core/platform/PlatformConnectionRegistry.java
 /Users/davidstafford/git/vox-stream/voxstream-core/src/main/java/com/voxstream/core/exception/ErrorCode.java
 /Users/davidstafford/git/vox-stream/voxstream-core/src/main/java/com/voxstream/core/config/profile/ProfileService.java
 /Users/davidstafford/git/vox-stream/voxstream-core/src/main/java/com/voxstream/core/config/JacksonConfig.java

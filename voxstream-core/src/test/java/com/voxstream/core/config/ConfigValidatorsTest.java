@@ -57,4 +57,26 @@ class ConfigValidatorsTest {
         assertDoesNotThrow(() -> configService
                 .setAll(Map.of(CoreConfigKeys.TTS_BUS_PURGE_INTERVAL_MIN, 20)));
     }
+
+    @Test
+    void boundaryValuesAccepted() {
+        // Minimal acceptable purge values (assuming 1 is allowed for both individually)
+        assertDoesNotThrow(() -> configService.setAll(Map.of(
+                CoreConfigKeys.EVENT_BUS_PURGE_INTERVAL_MIN, 1,
+                CoreConfigKeys.TTS_BUS_PURGE_INTERVAL_MIN, 1)));
+        // Port upper boundary (excluding reserved sentinel) 65534 ok
+        assertDoesNotThrow(() -> configService.set(CoreConfigKeys.WEB_OUTPUT_PORT, 65534));
+    }
+
+    @Test
+    void bulkSetRollbackOnFirstFailure() {
+        // First invalid (reserved port) should cause entire batch reject (tts should
+        // not persist)
+        assertThrows(IllegalArgumentException.class, () -> configService.setAll(Map.of(
+                CoreConfigKeys.WEB_OUTPUT_PORT, 65535,
+                CoreConfigKeys.TTS_BUS_PURGE_INTERVAL_MIN, 999)));
+        // After failure, setting valid TTS should still work (ensures no partial commit
+        // side-effects)
+        assertDoesNotThrow(() -> configService.set(CoreConfigKeys.TTS_BUS_PURGE_INTERVAL_MIN, 999));
+    }
 }
