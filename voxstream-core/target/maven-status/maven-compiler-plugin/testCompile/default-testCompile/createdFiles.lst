@@ -3,5 +3,14 @@ com/voxstream/core/config/export/ConfigExportUtilTest.class
 com/voxstream/core/platform/PlatformConnectionManagerSyntheticEventTest.class
 com/voxstream/core/dao/JdbcViewerDaoTest.class
 com/voxstream/core/bus/EventBusImplTest.class
+com/voxstream/core/dao/JdbcTwitchOAuthTokenDaoTest.class
+com/voxstream/core/platform/PlatformConnectionManagerTest.class
+com/voxstream/core/bus/EventBusCleanupTest.class
 com/voxstream/core/config/ConfigValidatorsTest.class
 com/voxstream/core/dao/JdbcConfigDaoTest.class
+com/voxstream/core/platform/PlatformConnectionRegistryTest.class
+com/voxstream/core/bus/EventBusLoadTest.class
+com/voxstream/core/platform/PlatformConnectionManagerBackoffTest.class
+com/voxstream/core/platform/PlatformConnectionRegistryTest$TestConfig.class
+com/voxstream/core/platform/PlatformConnectionManagerLogSummaryTest.class
+com/voxstream/core/platform/PlatformConnectionManagerStatusEventTest.class

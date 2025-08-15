@@ -57,6 +57,9 @@ public final class ConfigValidators {
                 (k, v) -> fail(k, "must be an unprivileged port 1024-65535"));
         register(CoreConfigKeys.TWITCH_TOKEN_VALIDATION_INTERVAL_SEC, v -> v >= 60 && v <= 3600,
                 (k, v) -> fail(k, "must be between 60 and 3600 seconds"));
+        // Twitch EventSub heartbeat interval 30-600 seconds (Twitch typically ~240s)
+        register(CoreConfigKeys.TWITCH_EVENTSUB_HEARTBEAT_INTERVAL_SEC, v -> v >= 30 && v <= 600,
+                (k, v) -> fail(k, "must be between 30 and 600 seconds"));
     }
 
     private ConfigValidators() {

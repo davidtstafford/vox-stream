@@ -115,6 +115,9 @@ public final class CoreConfigKeys {
     public static final ConfigKey<Integer> TWITCH_TOKEN_VALIDATION_INTERVAL_SEC = new ConfigKey<>(
             "twitch.token.validationIntervalSec", Integer.class, 900, false,
             "Interval for validating/refeshing Twitch OAuth token (seconds)");
+    public static final ConfigKey<Integer> TWITCH_EVENTSUB_HEARTBEAT_INTERVAL_SEC = new ConfigKey<>(
+            "twitch.eventsub.heartbeat.intervalSec", Integer.class, 240, false,
+            "Expected EventSub keepalive/heartbeat interval (seconds) used to detect stale WS sessions");
 
     // Registry of all keys for iteration / import-export (order preserved)
     private static final Map<String, ConfigKey<?>> REGISTRY;
@@ -150,6 +153,7 @@ public final class CoreConfigKeys {
         register(m, TWITCH_REDIRECT_PORT);
         register(m, TWITCH_EVENTSUB_TRANSPORT);
         register(m, TWITCH_TOKEN_VALIDATION_INTERVAL_SEC);
+        register(m, TWITCH_EVENTSUB_HEARTBEAT_INTERVAL_SEC);
         REGISTRY = Collections.unmodifiableMap(m);
         ALL = List.copyOf(REGISTRY.values());
     }

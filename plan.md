@@ -188,37 +188,43 @@ VoxStream is a Java-based application with a Java frontend and backend that inte
   - [x] Synthetic event publication test (PlatformConnectionManagerSyntheticEventTest)
 
 ### 3.2 Twitch Integration (MVP)
-- [ ] Setup Twitch API client
-  - [ ] Choose HTTP/WebSocket libs (Spring WebClient + Jetty WS)
-  - [ ] Create TwitchClient wrapper (REST + EventSub/IRC)
-- [ ] Implement OAuth authentication flow
+- [x] Setup Twitch API client
+  - [x] Choose HTTP/WebSocket libs (OkHttp for REST; Java 11 HttpClient placeholder; EventSub WS custom lightweight client)
+  - [x] Create TwitchClient wrapper (REST + EventSub/IRC) (initial REST + OAuth service implemented; EventSub WS pending)
+- [x] Implement OAuth authentication flow
   - [x] Persistence layer: token model + DAO (JdbcTwitchOAuthTokenDao)
   - [x] Encrypted storage for access/refresh tokens
-  - [ ] Config keys: twitch.clientId, twitch.clientSecret, twitch.scopes, twitch.redirectPort (defined)
-  - [ ] Local loopback auth helper & token exchange implementation
-  - [ ] Token refresh scheduler
-  - [ ] Validation & auto-refresh on startup if near expiry
-- [ ] Connect to Twitch EventSub or IRC
-  - [ ] Decide initial approach (EventSub WebSocket vs IRC chat) and document
-  - [ ] Implement connection adapter implementing PlatformConnection
-- [ ] Map Twitch events to internal event models
-  - [ ] Event mapping table (doc + code)
-  - [ ] Implement converters (subscription, bits, chat, follow, raid, host, channel point)
-- [ ] Handle Twitch-specific event types
-  - [ ] Viewer joins/leaves
-  - [ ] Subscriptions
-  - [ ] Subscription renewals
-  - [ ] Bit donations
-  - [ ] Chat messages
-  - [ ] Follows
-  - [ ] Raids
-  - [ ] Host events
-  - [ ] Channel point redemptions
-- [ ] Rate limit / message throttling considerations (placeholder)
-- [ ] Tests
-  - [ ] Mock Twitch API responses (WireMock)
-  - [ ] OAuth token refresh logic
-  - [ ] Event mapping fidelity tests (fixtures -> internal events)
+  - [x] Config keys: twitch.clientId, twitch.clientSecret, twitch.scopes, twitch.redirectPort (defined & validated)
+  - [x] Local loopback auth helper & token exchange implementation (TwitchOAuthService)
+  - [x] Token refresh scheduler (periodic validation/refresh task)
+  - [x] Validation & auto-refresh on startup if near expiry (ensureTokenInteractive + scheduled validation)
+  - [x] User identity augmentation (validate endpoint + Helix users fallback)
+  - [x] WireMock tests for validation / refresh / identity enrichment (added TwitchOAuthServiceWireMockTest scenarios)
+- [x] Connect to Twitch EventSub or IRC
+  - [x] Decision: Start with EventSub WebSocket (richer structured events, less IRC parsing). IRC chat integration deferred until chat messages required; interim placeholder for chat events.
+  - [x] Implement EventSub WebSocket session manager (heartbeat watchdog using twitch.eventsub.heartbeat.intervalSec) (basic watchdog implemented in EventSubWebSocketClient)
+  - [x] Implement connection adapter integrating EventSub + token refresh awareness (TwitchPlatformConnection enhancement w/ mapping)
+  - [x] Introduce EventSubClient abstraction for testability (EventSubWebSocketClient implements)
+  - [x] EventSub heartbeat timeout auto-reconnect test (added TwitchPlatformConnectionHeartbeatAutoReconnectTest)
+- [x] Map Twitch events to internal event models
+  - [x] Event mapping table (subscriptions, bits, follows, raids, channel point redemptions, host; chat deferred)
+  - [x] Implement converters (subscription, bits, follow, raid, host, channel point) (initial generic mapper TwitchEventMapper with EventType mapping; detailed field extraction expanded)
+  - [x] Add standardized payload extraction & unit tests (TwitchEventMapperTest)
+- [x] Handle Twitch-specific event types
+  - [x] Subscriptions (gift/renewal/message variants detailed field coverage initial pass; additional metadata captured: tier, cumulative/streak/duration months, gift info)
+  - [x] Bit donations (added isAnonymous + existing bits count)
+  - [x] Follows (base fields + display name when present)
+  - [x] Raids (base fields mapped)
+  - [x] Host events (placeholder only)
+  - [x] Channel point redemptions (reward id/title/cost/prompt + user input + status)
+  - [ ] Viewer joins/leaves (deferred: requires IRC)
+  - [ ] Chat messages (deferred until IRC or alternative approach)
+- [ ] Rate limit / message throttling considerations (placeholder - gather requirements)
+- [x] Tests
+  - [x] Mock Twitch API responses (WireMock) (validation, refresh, identity)
+  - [x] OAuth token refresh logic (WireMock)
+  - [x] Event mapping fidelity tests (fixtures -> internal events) (TwitchEventMapperTest extended)
+  - [x] EventSub heartbeat timeout & auto-reconnect tests (heartbeat failure + reconnect scenario)
 
 ### 3.3 Connection Management UI
 - [ ] Create connection configuration screen

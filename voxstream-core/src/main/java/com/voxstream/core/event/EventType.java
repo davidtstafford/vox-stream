@@ -12,5 +12,7 @@ public enum EventType {
     BITS,
     SYSTEM,
     TTS_REQUEST,
+    CHANNEL_POINT,
+    HOST,
     UNKNOWN
 }
