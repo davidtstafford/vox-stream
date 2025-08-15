@@ -52,6 +52,11 @@ public final class ConfigValidators {
         // Periodic status log summary interval 60-3600 seconds
         register(CoreConfigKeys.PLATFORM_STATUS_LOG_SUMMARY_INTERVAL_SEC, v -> v >= 60 && v <= 3600,
                 (k, v) -> fail(k, "must be between 60 and 3600 seconds"));
+        // Twitch specific
+        register(CoreConfigKeys.TWITCH_REDIRECT_PORT, v -> v >= 1024 && v <= 65535,
+                (k, v) -> fail(k, "must be an unprivileged port 1024-65535"));
+        register(CoreConfigKeys.TWITCH_TOKEN_VALIDATION_INTERVAL_SEC, v -> v >= 60 && v <= 3600,
+                (k, v) -> fail(k, "must be between 60 and 3600 seconds"));
     }
 
     private ConfigValidators() {

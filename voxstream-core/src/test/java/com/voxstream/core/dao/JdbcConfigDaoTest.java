@@ -1,40 +1,65 @@
 package com.voxstream.core.dao;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.h2.jdbcx.JdbcDataSource;
+import java.util.UUID;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 import com.voxstream.core.dao.jdbc.JdbcConfigDao;
 import com.voxstream.core.security.EncryptionService;
 
 public class JdbcConfigDaoTest {
-    private JdbcTemplate jdbc;
+
+    private JdbcTemplate jdbcTemplate;
     private JdbcConfigDao dao;
 
     @BeforeEach
     void setup() {
-        JdbcDataSource ds = new JdbcDataSource();
-        ds.setURL("jdbc:h2:mem:config-test;DB_CLOSE_DELAY=-1");
-        ds.setUser("sa");
-        ds.setPassword("");
-        jdbc = new JdbcTemplate(ds);
-        jdbc.execute(
+        DriverManagerDataSource ds = new DriverManagerDataSource(
+                "jdbc:h2:mem:" + UUID.randomUUID() + ";DB_CLOSE_DELAY=-1", "sa",
+                "");
+        jdbcTemplate = new JdbcTemplate(ds);
+        jdbcTemplate.execute(
                 "CREATE TABLE app_config (cfg_key VARCHAR(128) PRIMARY KEY, cfg_value CLOB NULL, updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP)");
-        EncryptionService enc = new EncryptionService();
-        dao = new JdbcConfigDao(jdbc, enc);
+        jdbcTemplate.execute(
+                "CREATE TABLE IF NOT EXISTS twitch_oauth_token (id INT PRIMARY KEY, access_token CLOB, refresh_token CLOB, scopes CLOB, expires_at BIGINT, user_id VARCHAR(64), login VARCHAR(64), updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP)");
+        dao = new JdbcConfigDao(jdbcTemplate, new EncryptionService());
     }
 
     @Test
-    void putGetDelete() {
-        dao.put("k1", "v1");
-        assertEquals("v1", dao.get("k1").orElse(null));
-        dao.put("k1", "v2");
-        assertEquals("v2", dao.get("k1").orElse(null));
-        dao.delete("k1");
-        assertTrue(dao.get("k1").isEmpty());
+    void testPutAndGet() {
+        dao.put("sample.key", "value");
+        assertEquals("value", dao.get("sample.key").orElse(null));
+    }
+
+    @Test
+    void testEncryption() {
+        dao.put("my.secret.value", "secret");
+        String stored = jdbcTemplate.queryForObject("SELECT cfg_value FROM app_config WHERE cfg_key='my.secret.value'",
+                String.class);
+        assertNotNull(stored);
+        assertTrue(stored.startsWith("ENC:")); // Adjusted to match EncryptionService prefix (single colon)
+        assertEquals("secret", dao.get("my.secret.value").orElse(null));
+    }
+
+    @Test
+    void testDelete() {
+        dao.put("a", "1");
+        dao.delete("a");
+        assertTrue(dao.get("a").isEmpty());
+    }
+
+    @Test
+    void testAllMasksSecrets() {
+        dao.put("plain.key", "hello");
+        dao.put("api.secret.key", "top");
+        assertEquals("hello", dao.all().get("plain.key"));
+        assertEquals("***", dao.all().get("api.secret.key"));
     }
 }

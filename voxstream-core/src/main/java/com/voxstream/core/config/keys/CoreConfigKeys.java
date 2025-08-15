@@ -93,6 +93,29 @@ public final class CoreConfigKeys {
             "platform.status.logSummary.intervalSec", Integer.class, 300, false,
             "Interval in seconds for platform status summary logging");
 
+    // --- Twitch integration (Phase 3.2) ---
+    public static final ConfigKey<Boolean> TWITCH_ENABLED = new ConfigKey<>(
+            "twitch.enabled", Boolean.class, Boolean.FALSE, false,
+            "Enable Twitch platform connection");
+    public static final ConfigKey<String> TWITCH_CLIENT_ID = new ConfigKey<>(
+            "twitch.clientId", String.class, "", false,
+            "Twitch application Client ID");
+    public static final ConfigKey<String> TWITCH_CLIENT_SECRET = new ConfigKey<>(
+            "twitch.clientSecret", String.class, "", true,
+            "Twitch application Client Secret (stored encrypted)");
+    public static final ConfigKey<String> TWITCH_SCOPES = new ConfigKey<>(
+            "twitch.scopes", String.class, "chat:read chat:edit", false,
+            "Space or comma separated Twitch OAuth scopes");
+    public static final ConfigKey<Integer> TWITCH_REDIRECT_PORT = new ConfigKey<>(
+            "twitch.redirectPort", Integer.class, 51515, false,
+            "Local loopback port for OAuth redirect (1024-65535)");
+    public static final ConfigKey<String> TWITCH_EVENTSUB_TRANSPORT = new ConfigKey<>(
+            "twitch.eventsub.transport", String.class, "websocket", false,
+            "EventSub transport type (websocket)");
+    public static final ConfigKey<Integer> TWITCH_TOKEN_VALIDATION_INTERVAL_SEC = new ConfigKey<>(
+            "twitch.token.validationIntervalSec", Integer.class, 900, false,
+            "Interval for validating/refeshing Twitch OAuth token (seconds)");
+
     // Registry of all keys for iteration / import-export (order preserved)
     private static final Map<String, ConfigKey<?>> REGISTRY;
     public static final List<ConfigKey<?>> ALL;
@@ -119,6 +142,14 @@ public final class CoreConfigKeys {
         register(m, PLATFORM_RECONNECT_RESET_AFTER_STABLE_MS);
         register(m, PLATFORM_STATUS_LOG_SUMMARY_ENABLED);
         register(m, PLATFORM_STATUS_LOG_SUMMARY_INTERVAL_SEC);
+        // Twitch keys (Phase 3.2)
+        register(m, TWITCH_ENABLED);
+        register(m, TWITCH_CLIENT_ID);
+        register(m, TWITCH_CLIENT_SECRET);
+        register(m, TWITCH_SCOPES);
+        register(m, TWITCH_REDIRECT_PORT);
+        register(m, TWITCH_EVENTSUB_TRANSPORT);
+        register(m, TWITCH_TOKEN_VALIDATION_INTERVAL_SEC);
         REGISTRY = Collections.unmodifiableMap(m);
         ALL = List.copyOf(REGISTRY.values());
     }

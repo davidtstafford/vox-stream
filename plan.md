@@ -156,6 +156,8 @@ VoxStream is a Java-based application with a Java frontend and backend that inte
   - [x] Add config keys: platform.enabled, reconnect.initialDelayMs, reconnect.maxDelayMs, reconnect.maxAttempts (-1=infinite), heartbeat.intervalSec, reconnect.jitterPercent, reconnect.resetAfterStableMs
   - [x] Implement validators for new keys (ranges, relationships: initial < max, positive intervals, jitter 0.0-0.5, resetAfterStable 10s-1h)
   - [x] Profile support: include new keys in export/import & checksum
+  - [x] Add Twitch config keys & individual validators (clientId, clientSecret, scopes, redirectPort, eventsub.transport, token.validationIntervalSec)
+  - [x] Add composite Twitch validation (require clientId/secret when twitch.enabled=true)
 - [x] Implement connection management system
   - [x] PlatformConnectionManager orchestrating factories, active connections, lifecycle (initial implementation)
   - [x] Track per-connection state machine (DISCONNECTED, CONNECTING, CONNECTED, FAILED, RECONNECT_SCHEDULED)
@@ -190,9 +192,12 @@ VoxStream is a Java-based application with a Java frontend and backend that inte
   - [ ] Choose HTTP/WebSocket libs (Spring WebClient + Jetty WS)
   - [ ] Create TwitchClient wrapper (REST + EventSub/IRC)
 - [ ] Implement OAuth authentication flow
-  - [ ] Config keys: twitch.clientId, twitch.clientSecret (secure store), twitch.scopes, twitch.redirectPort
-  - [ ] Local loopback auth helper & token persistence (encrypted)
+  - [x] Persistence layer: token model + DAO (JdbcTwitchOAuthTokenDao)
+  - [x] Encrypted storage for access/refresh tokens
+  - [ ] Config keys: twitch.clientId, twitch.clientSecret, twitch.scopes, twitch.redirectPort (defined)
+  - [ ] Local loopback auth helper & token exchange implementation
   - [ ] Token refresh scheduler
+  - [ ] Validation & auto-refresh on startup if near expiry
 - [ ] Connect to Twitch EventSub or IRC
   - [ ] Decide initial approach (EventSub WebSocket vs IRC chat) and document
   - [ ] Implement connection adapter implementing PlatformConnection

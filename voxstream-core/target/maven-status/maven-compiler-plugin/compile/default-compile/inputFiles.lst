@@ -13,6 +13,7 @@
 /Users/davidstafford/git/vox-stream/voxstream-core/src/main/java/com/voxstream/core/platform/PlatformConnectionManager.java
 /Users/davidstafford/git/vox-stream/voxstream-core/src/main/java/com/voxstream/core/exception/VoxStreamException.java
 /Users/davidstafford/git/vox-stream/voxstream-core/src/main/java/com/voxstream/core/persistence/EventPersistenceService.java
+/Users/davidstafford/git/vox-stream/voxstream-core/src/main/java/com/voxstream/core/dao/TwitchOAuthTokenDao.java
 /Users/davidstafford/git/vox-stream/voxstream-core/src/main/java/com/voxstream/core/config/ConfigurationService.java
 /Users/davidstafford/git/vox-stream/voxstream-core/src/main/java/com/voxstream/core/dao/ConfigDao.java
 /Users/davidstafford/git/vox-stream/voxstream-core/src/main/java/com/voxstream/core/bus/EventFilter.java
@@ -27,7 +28,9 @@
 /Users/davidstafford/git/vox-stream/voxstream-core/src/main/java/com/voxstream/core/config/keys/CoreConfigKeys.java
 /Users/davidstafford/git/vox-stream/voxstream-core/src/main/java/com/voxstream/core/config/validation/ConfigValidators.java
 /Users/davidstafford/git/vox-stream/voxstream-core/src/main/java/com/voxstream/core/platform/PlatformConnectionRegistry.java
+/Users/davidstafford/git/vox-stream/voxstream-core/src/main/java/com/voxstream/core/dao/jdbc/JdbcTwitchOAuthTokenDao.java
 /Users/davidstafford/git/vox-stream/voxstream-core/src/main/java/com/voxstream/core/exception/ErrorCode.java
 /Users/davidstafford/git/vox-stream/voxstream-core/src/main/java/com/voxstream/core/config/profile/ProfileService.java
 /Users/davidstafford/git/vox-stream/voxstream-core/src/main/java/com/voxstream/core/config/JacksonConfig.java
 /Users/davidstafford/git/vox-stream/voxstream-core/src/main/java/com/voxstream/core/config/export/ConfigExportUtil.java
+/Users/davidstafford/git/vox-stream/voxstream-core/src/main/java/com/voxstream/core/twitch/model/TwitchOAuthToken.java
