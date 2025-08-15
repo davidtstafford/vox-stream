@@ -49,6 +49,9 @@ public final class ConfigValidators {
         // Backoff reset threshold 10s - 1h (ensure reasonable)
         register(CoreConfigKeys.PLATFORM_RECONNECT_RESET_AFTER_STABLE_MS, v -> v >= 10_000 && v <= 3_600_000,
                 (k, v) -> fail(k, "must be between 10000 and 3600000 ms"));
+        // Periodic status log summary interval 60-3600 seconds
+        register(CoreConfigKeys.PLATFORM_STATUS_LOG_SUMMARY_INTERVAL_SEC, v -> v >= 60 && v <= 3600,
+                (k, v) -> fail(k, "must be between 60 and 3600 seconds"));
     }
 
     private ConfigValidators() {

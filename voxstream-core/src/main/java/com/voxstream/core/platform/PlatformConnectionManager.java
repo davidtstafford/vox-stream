@@ -31,6 +31,14 @@ import com.voxstream.platform.api.PlatformStatus;
 public class PlatformConnectionManager {
 
     private static final Logger log = LoggerFactory.getLogger(PlatformConnectionManager.class);
+    /**
+     * Internal test hook: if this system property is set (milliseconds), it
+     * overrides
+     * the configured seconds interval for status summary scheduling. Not exposed as
+     * a
+     * ConfigKey, bypasses validators. Intended ONLY for tests.
+     */
+    static final String TEST_LOG_SUMMARY_INTERVAL_MS_PROP = "vox.platform.status.logSummary.testIntervalMs";
 
     private final PlatformConnectionRegistry registry;
     private final ConfigurationService config;
@@ -43,6 +51,12 @@ public class PlatformConnectionManager {
         return t;
     });
     private final AtomicBoolean started = new AtomicBoolean(false);
+
+    /**
+     * Test-only hooks to observe periodic summary without relying on logging
+     * backend.
+     */
+    private final java.util.List<java.util.function.Consumer<java.util.List<SummaryRow>>> testSummaryHooks = new java.util.concurrent.CopyOnWriteArrayList<>();
 
     public PlatformConnectionManager(PlatformConnectionRegistry registry, ConfigurationService config,
             EventBus eventBus) {
@@ -60,6 +74,7 @@ public class PlatformConnectionManager {
         }
         log.info("PlatformConnectionManager starting (platforms={})", registry.platformIds());
         registry.platformIds().forEach(this::initAndConnectAsync);
+        startLogSummaryIfEnabled();
     }
 
     public void shutdown() {
@@ -85,7 +100,9 @@ public class PlatformConnectionManager {
         ConnState state = states.computeIfAbsent(platformId, id -> new ConnState(conn));
         // register listener to propagate transitions (for external changes)
         conn.addStatusListener(ps -> state.lastStatus = ps);
-        attemptConnect(state, 0, config.get(CoreConfigKeys.PLATFORM_RECONNECT_INITIAL_DELAY_MS));
+        int initialDelay = config.get(CoreConfigKeys.PLATFORM_RECONNECT_INITIAL_DELAY_MS);
+        state.lastBaseDelayMs = initialDelay; // seed base delay tracker
+        attemptConnect(state, 0, initialDelay);
     }
 
     private void attemptConnect(ConnState state, int attempt, int currentDelayMs) {
@@ -101,22 +118,23 @@ public class PlatformConnectionManager {
                 scheduleBackoffResetIfStable(state); // defer reset until stable period elapsed
             } else {
                 state.metrics.failedAttempts++;
-                String msg = ex != null ? ex.getMessage() : "failed";
-                PlatformStatus failedStatus = (ex != null && ex.getMessage() != null
-                        && ex.getMessage().contains("fatal"))
-                                ? PlatformStatus.failed(msg, true)
-                                : PlatformStatus.failed(msg);
+                // Inspect connection status for fatal flag (scripted outcomes) first
+                PlatformStatus connectionReported = state.connection.status();
+                boolean fatal = connectionReported.state() == PlatformStatus.State.FAILED && connectionReported.fatal();
+                String msg = ex != null && ex.getMessage() != null ? ex.getMessage()
+                        : connectionReported.detail() != null ? connectionReported.detail() : "failed";
+                PlatformStatus failedStatus = fatal ? PlatformStatus.failed(msg, true) : PlatformStatus.failed(msg);
                 updateStatus(state, failedStatus);
                 if (failedStatus.fatal()) {
                     log.warn("[{}] Fatal failure -> not scheduling reconnect", id);
                 } else {
-                    scheduleReconnect(state, attempt + 1, currentDelayMs);
+                    scheduleReconnect(state, attempt + 1);
                 }
             }
         });
     }
 
-    private void scheduleReconnect(ConnState state, int nextAttempt, int previousDelayMs) {
+    private void scheduleReconnect(ConnState state, int nextAttempt) {
         if (!started.get())
             return;
         int maxAttempts = config.get(CoreConfigKeys.PLATFORM_RECONNECT_MAX_ATTEMPTS);
@@ -125,10 +143,12 @@ public class PlatformConnectionManager {
             return;
         }
         int maxDelay = config.get(CoreConfigKeys.PLATFORM_RECONNECT_MAX_DELAY_MS);
-        int baseDelay = Math.min(previousDelayMs * 2, maxDelay);
-        // Apply jitter
-        double jitterPct = config.get(CoreConfigKeys.PLATFORM_RECONNECT_JITTER_PERCENT);
+        // compute next base from stored base (not jittered) value
+        int baseDelay = Math.min(state.lastBaseDelayMs * 2, maxDelay);
+        state.lastBaseDelayMs = baseDelay; // persist new base
         int adjustedDelay = baseDelay;
+        // Apply jitter AFTER determining base
+        double jitterPct = config.get(CoreConfigKeys.PLATFORM_RECONNECT_JITTER_PERCENT);
         if (jitterPct > 0) {
             long jitterRange = Math.round(baseDelay * jitterPct);
             if (jitterRange > 0) {
@@ -199,12 +219,69 @@ public class PlatformConnectionManager {
         return Optional.ofNullable(states.get(platformId)).map(s -> s.metrics).orElseGet(Metrics::new);
     }
 
+    public void addTestSummaryHook(java.util.function.Consumer<java.util.List<SummaryRow>> hook) {
+        if (hook != null) {
+            testSummaryHooks.add(hook);
+        }
+    }
+
+    public static record SummaryRow(String platformId, PlatformStatus.State state, boolean fatal, long connects,
+            long failedAttempts, int backoffMs) {
+    }
+
+    private void startLogSummaryIfEnabled() {
+        if (!config.get(CoreConfigKeys.PLATFORM_STATUS_LOG_SUMMARY_ENABLED))
+            return;
+        int intervalSec = config.get(CoreConfigKeys.PLATFORM_STATUS_LOG_SUMMARY_INTERVAL_SEC);
+        long overrideMs = -1;
+        try {
+            String prop = System.getProperty(TEST_LOG_SUMMARY_INTERVAL_MS_PROP);
+            if (prop != null) {
+                overrideMs = Long.parseLong(prop.trim());
+            }
+        } catch (NumberFormatException ignored) {
+        }
+        Runnable task = () -> {
+            if (!started.get())
+                return;
+            try {
+                java.util.List<SummaryRow> rows = new java.util.ArrayList<>();
+                registry.platformIds().forEach(id -> {
+                    PlatformStatus st = status(id);
+                    Metrics m = metrics(id);
+                    log.info("[status-summary] platform={} state={} fatal={} connects={} fails={} backoffMs={}", id,
+                            st.state(), st.fatal(), m.connects, m.failedAttempts, m.currentBackoffMs);
+                    rows.add(new SummaryRow(id, st.state(), st.fatal(), m.connects, m.failedAttempts,
+                            m.currentBackoffMs));
+                });
+                if (!testSummaryHooks.isEmpty()) {
+                    for (var h : testSummaryHooks) {
+                        try {
+                            h.accept(rows);
+                        } catch (Exception e) {
+                            log.debug("Test summary hook error: {}", e.getMessage());
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                log.debug("Status summary failed: {}", e.getMessage());
+            }
+        };
+        if (overrideMs > 0) {
+            long intervalMs = overrideMs;
+            scheduler.scheduleAtFixedRate(task, intervalMs, intervalMs, java.util.concurrent.TimeUnit.MILLISECONDS);
+            return;
+        }
+        scheduler.scheduleAtFixedRate(task, intervalSec, intervalSec, java.util.concurrent.TimeUnit.SECONDS);
+    }
+
     // --- Internal State ---
     private static class ConnState {
         final PlatformConnection connection;
         volatile PlatformStatus lastStatus = PlatformStatus.disconnected();
         long lastSuccessfulConnectEpochMs = 0L; // now referenced in publishStatusEvent
         final Metrics metrics = new Metrics();
+        volatile int lastBaseDelayMs = 0; // tracks exponential progression independent of jitter
 
         ConnState(PlatformConnection c) {
             this.connection = c;
@@ -212,6 +289,7 @@ public class PlatformConnectionManager {
 
         void resetBackoff() {
             metrics.currentBackoffMs = 0;
+            // leave lastBaseDelayMs untouched; next failure will double from existing base
         }
     }
 

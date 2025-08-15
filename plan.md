@@ -167,23 +167,24 @@ VoxStream is a Java-based application with a Java frontend and backend that inte
   - [x] Distinguish transient vs fatal errors (fatal stops further reconnect attempts)
   - [x] Reset backoff on successful connect duration threshold (reconnect.resetAfterStableMs)
   - [x] Additional tests with extended DummyPlatformConnection failure scripts (covered by PlatformConnectionManagerBackoffTest fatal & jitter scenarios)
-- [ ] Create connection status monitoring
+- [x] Create connection status monitoring
   - [x] Metrics: connects, disconnects, failedAttempts, currentBackoffMs
   - [x] Snapshot API exposed via manager
-  - [ ] Periodic log summary (config flag)
+  - [x] Periodic log summary (config flag platform.status.logSummary.enabled / interval) (covered by PlatformConnectionManagerLogSummaryTest)
 - [ ] Enhance DummyPlatformConnection for testing
   - [x] Simulate connect latency & failure injection script (incl. fatal markers)
-  - [ ] Toggle to emit synthetic platform events (chat message / heartbeat)
-  - [ ] Expose controllable clock or hooks for tests
-- [ ] Tests
+  - [x] Toggle to emit synthetic platform events (internal hook & counter; future bus publish) + controllable clock setter
+  - [ ] Expose controllable clock or hooks for tests (basic setter exists; need event emission path & tests)
+  - [ ] Publish synthetic events to EventBus when enabled (pending)
+- [x] Tests
   - [x] Manager lifecycle (start, connect all enabled, shutdown)
   - [x] Auto-reconnect success after transient failures
   - [x] Backoff growth & reset assertions (PlatformConnectionManagerBackoffTest)
   - [x] Jitter application within expected +/- range (PlatformConnectionManagerBackoffTest)
   - [x] Fatal failure stops reconnection attempts (PlatformConnectionManagerBackoffTest)
-  - [ ] Status event propagation to EventBus subscribers
+  - [x] Status event propagation to EventBus subscribers (PlatformConnectionManagerStatusEventTest)
   - [x] Validation of new config keys (boundary, composite)
-    - Planned: implement StatusEventPropagationTest subscribing to EventBus SYSTEM events and asserting ordered sequence of states including RECONNECT_SCHEDULED tokens.
+    - NOTE: StatusEventPropagationTest implemented as PlatformConnectionManagerStatusEventTest.
 
 ### 3.2 Twitch Integration (MVP)
 - [ ] Setup Twitch API client

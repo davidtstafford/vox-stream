@@ -84,6 +84,15 @@ public final class CoreConfigKeys {
             "platform.reconnect.resetAfterStableMs", Integer.class, 120_000, false,
             "Reset accumulated reconnect backoff after stable connection duration (ms)");
 
+    // Periodic platform status summary logging enable toggle (Phase 3.1 monitoring)
+    public static final ConfigKey<Boolean> PLATFORM_STATUS_LOG_SUMMARY_ENABLED = new ConfigKey<>(
+            "platform.status.logSummary.enabled", Boolean.class, Boolean.FALSE, false,
+            "Enable periodic platform status summary logging");
+    // Periodic summary interval seconds (60-3600)
+    public static final ConfigKey<Integer> PLATFORM_STATUS_LOG_SUMMARY_INTERVAL_SEC = new ConfigKey<>(
+            "platform.status.logSummary.intervalSec", Integer.class, 300, false,
+            "Interval in seconds for platform status summary logging");
+
     // Registry of all keys for iteration / import-export (order preserved)
     private static final Map<String, ConfigKey<?>> REGISTRY;
     public static final List<ConfigKey<?>> ALL;
@@ -108,6 +117,8 @@ public final class CoreConfigKeys {
         register(m, PLATFORM_HEARTBEAT_INTERVAL_SEC);
         register(m, PLATFORM_RECONNECT_JITTER_PERCENT);
         register(m, PLATFORM_RECONNECT_RESET_AFTER_STABLE_MS);
+        register(m, PLATFORM_STATUS_LOG_SUMMARY_ENABLED);
+        register(m, PLATFORM_STATUS_LOG_SUMMARY_INTERVAL_SEC);
         REGISTRY = Collections.unmodifiableMap(m);
         ALL = List.copyOf(REGISTRY.values());
     }

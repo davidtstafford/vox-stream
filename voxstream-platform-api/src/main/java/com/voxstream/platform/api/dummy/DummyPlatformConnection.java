@@ -1,5 +1,6 @@
 package com.voxstream.platform.api.dummy;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -38,6 +39,8 @@ public class DummyPlatformConnection implements PlatformConnection {
     private volatile long simulatedLatencyMs = 250;
     @SuppressWarnings("unused")
     private volatile boolean emitSyntheticEvents = false; // placeholder for future event emission toggle
+    private volatile Clock clock = Clock.systemUTC();
+    private volatile long syntheticEventCounter = 0;
 
     /** Configure a sequence of outcomes for upcoming connect() attempts. */
     public void setScriptedOutcomes(List<?> outcomes) {
@@ -53,6 +56,19 @@ public class DummyPlatformConnection implements PlatformConnection {
     /** Toggle synthetic platform event emission (future hook). */
     public void setEmitSyntheticEvents(boolean enable) {
         this.emitSyntheticEvents = enable;
+    }
+
+    public void setClock(Clock clock) {
+        this.clock = clock != null ? clock : Clock.systemUTC();
+    }
+
+    public void tickSyntheticEvent() {
+        if (!emitSyntheticEvents || status.get().state() != State.CONNECTED)
+            return;
+        long n = ++syntheticEventCounter;
+        log.debug("[DummyPlatform] Synthetic event #{} at {}", n, clock.instant());
+        // Future: publish via callback into manager/event bus through listener
+        // mechanism
     }
 
     @Override

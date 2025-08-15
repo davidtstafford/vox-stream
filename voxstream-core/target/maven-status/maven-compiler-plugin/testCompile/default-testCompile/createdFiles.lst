@@ -1,6 +1,6 @@
-com/voxstream/core/config/ConfigValidatorsTest.class
 com/voxstream/core/config/profile/ProfileServiceTest.class
-com/voxstream/core/dao/JdbcConfigDaoTest.class
 com/voxstream/core/config/export/ConfigExportUtilTest.class
 com/voxstream/core/dao/JdbcViewerDaoTest.class
 com/voxstream/core/bus/EventBusImplTest.class
+com/voxstream/core/config/ConfigValidatorsTest.class
+com/voxstream/core/dao/JdbcConfigDaoTest.class
