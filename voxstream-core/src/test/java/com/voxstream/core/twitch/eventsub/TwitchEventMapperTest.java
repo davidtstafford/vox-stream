@@ -66,6 +66,29 @@ public class TwitchEventMapperTest {
         assertEquals("g1", pe.payload().get("gifterUserId"));
     }
 
+    // New test validating camelCase normalization for subscription metrics
+    @Test
+    void testSubscriptionFieldNormalization() {
+        Map<String, Object> event = new HashMap<>();
+        event.put("user_id", "u2");
+        event.put("user_login", "subber");
+        event.put("broadcaster_user_id", "b2");
+        event.put("broadcaster_user_login", "broad2");
+        event.put("is_gift", false);
+        event.put("tier", "3000");
+        event.put("cumulative_months", 12);
+        event.put("streak_months", 4);
+        event.put("duration_months", 1);
+        var msg = build("notification", "channel.subscribe", event);
+        var pe = TwitchEventMapper.map(msg);
+        assertEquals("SUBSCRIPTION", pe.type());
+        assertEquals(false, pe.payload().get("isGift"));
+        assertEquals(12, pe.payload().get("cumulativeMonths"));
+        assertEquals(4, pe.payload().get("streakMonths"));
+        assertEquals(1, pe.payload().get("durationMonths"));
+        assertEquals("3000", pe.payload().get("tier"));
+    }
+
     @Test
     void testBitsMapping() {
         Map<String, Object> event = new HashMap<>();

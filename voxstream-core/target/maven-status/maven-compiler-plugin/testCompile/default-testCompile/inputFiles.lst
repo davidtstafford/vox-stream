@@ -11,6 +11,7 @@
 /Users/davidstafford/git/vox-stream/voxstream-core/src/test/java/com/voxstream/core/platform/PlatformConnectionManagerLogSummaryTest.java
 /Users/davidstafford/git/vox-stream/voxstream-core/src/test/java/com/voxstream/core/twitch/oauth/TwitchOAuthServiceWireMockTest.java
 /Users/davidstafford/git/vox-stream/voxstream-core/src/test/java/com/voxstream/core/twitch/eventsub/TwitchEventMapperTest.java
+/Users/davidstafford/git/vox-stream/voxstream-core/src/test/java/com/voxstream/core/twitch/client/TwitchRestClientRateLimitTest.java
 /Users/davidstafford/git/vox-stream/voxstream-core/src/test/java/com/voxstream/core/dao/JdbcViewerDaoTest.java
 /Users/davidstafford/git/vox-stream/voxstream-core/src/test/java/com/voxstream/core/bus/EventBusLoadTest.java
 /Users/davidstafford/git/vox-stream/voxstream-core/src/test/java/com/voxstream/core/platform/PlatformConnectionManagerStatusEventTest.java

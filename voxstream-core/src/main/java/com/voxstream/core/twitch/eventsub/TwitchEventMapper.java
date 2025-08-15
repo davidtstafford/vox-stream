@@ -92,6 +92,11 @@ public final class TwitchEventMapper {
                 }
                 rename(out, "gifter_user_id", "gifterUserId");
                 rename(out, "gifter_user_login", "gifterUserLogin");
+                // camelCase normalization
+                rename(out, "is_gift", "isGift");
+                rename(out, "cumulative_months", "cumulativeMonths");
+                rename(out, "streak_months", "streakMonths");
+                rename(out, "duration_months", "durationMonths");
                 break;
             case "BITS":
                 copy(event, out, "user_id", "user_login", "broadcaster_user_id", "broadcaster_user_login", "bits",

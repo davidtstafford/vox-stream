@@ -199,7 +199,7 @@ VoxStream is a Java-based application with a Java frontend and backend that inte
   - [x] Token refresh scheduler (periodic validation/refresh task)
   - [x] Validation & auto-refresh on startup if near expiry (ensureTokenInteractive + scheduled validation)
   - [x] User identity augmentation (validate endpoint + Helix users fallback)
-  - [x] WireMock tests for validation / refresh / identity enrichment (added TwitchOAuthServiceWireMockTest scenarios)
+  - [x] WireMock tests for validation / refresh / identity enrichment (added TwitchOAuthServiceWireMockTest scenarios: success augment, invalid 401 deletion, refresh flow)
 - [x] Connect to Twitch EventSub or IRC
   - [x] Decision: Start with EventSub WebSocket (richer structured events, less IRC parsing). IRC chat integration deferred until chat messages required; interim placeholder for chat events.
   - [x] Implement EventSub WebSocket session manager (heartbeat watchdog using twitch.eventsub.heartbeat.intervalSec) (basic watchdog implemented in EventSubWebSocketClient)
@@ -217,18 +217,21 @@ VoxStream is a Java-based application with a Java frontend and backend that inte
   - [x] Raids (base fields mapped)
   - [x] Host events (placeholder only)
   - [x] Channel point redemptions (reward id/title/cost/prompt + user input + status)
-  - [ ] Viewer joins/leaves (deferred: requires IRC)
-  - [ ] Chat messages (deferred until IRC or alternative approach)
-- [ ] Rate limit / message throttling considerations (placeholder - gather requirements)
+  - [ ] Viewer joins/leaves (deferred: requires IRC; scheduled for future chat/IRC phase)
+  - [ ] Chat messages (deferred until IRC or alternative approach; scheduled for future chat/IRC phase)
+- [x] Rate limit / message throttling considerations (basic header capture + RateLimitInfo, pre-flight delay logic in TwitchRestClient, unit tests in TwitchRestClientRateLimitTest; advanced adaptive throttling deferred)
 - [x] Tests
   - [x] Mock Twitch API responses (WireMock) (validation, refresh, identity)
   - [x] OAuth token refresh logic (WireMock)
   - [x] Event mapping fidelity tests (fixtures -> internal events) (TwitchEventMapperTest extended)
   - [x] EventSub heartbeat timeout & auto-reconnect tests (heartbeat failure + reconnect scenario)
 
+Phase 3.2 status: COMPLETE (All core Twitch integration goals met; chat & viewer join/leave events explicitly deferred to later phase.)
+
 ### 3.3 Connection Management UI
 - [ ] Create connection configuration screen
   - [ ] Table: Platform | Status | Last Connected | Retries | Actions
+  - [ ] (TODO) Wire table to PlatformConnectionManager snapshot + live status event subscription
 - [ ] Add platform selection interface (combo + add button for future platforms)
 - [ ] Implement credential input forms (dynamic for selected platform)
 - [ ] Add connection status indicators (color/icon bound to status)

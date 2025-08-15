@@ -91,6 +91,13 @@
             <version>2.35.1</version>
             <scope>test</scope>
         </dependency>
+        <!-- Servlet API needed by WireMock Jetty (test scope) -->
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>4.0.1</version>
+            <scope>test</scope>
+        </dependency>
         <!-- Testing -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>

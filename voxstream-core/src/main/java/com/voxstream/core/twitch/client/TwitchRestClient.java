@@ -2,12 +2,14 @@ package com.voxstream.core.twitch.client;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.springframework.stereotype.Component;
 
@@ -42,6 +44,9 @@ public class TwitchRestClient implements Closeable {
     private final String helixBase; // resolved once at construction (system property override)
     private final String validateUrl; // resolved once at construction
     private final AtomicReference<RateLimitInfo> lastRateLimitInfo = new AtomicReference<>();
+    // Simple guard so only one caller sleeps for reset; others pass through after
+    // first schedules
+    private final ReentrantLock rateLimitSleepLock = new ReentrantLock();
 
     public TwitchRestClient(TwitchOAuthService oauthService, ConfigurationService config) {
         this.oauthService = Objects.requireNonNull(oauthService);
@@ -66,6 +71,8 @@ public class TwitchRestClient implements Closeable {
     }
 
     public CompletableFuture<ValidationResult> validateToken(String accessToken) {
+        // Pre-flight basic rate limit delay (blocking) before issuing request
+        applyPreRequestRateLimitDelay();
         Request req = new Request.Builder().url(validateUrl)
                 .header("Authorization", "OAuth " + accessToken)
                 .get().build();
@@ -116,6 +123,8 @@ public class TwitchRestClient implements Closeable {
         if (tok.isEmpty()) {
             return CompletableFuture.completedFuture(Optional.empty());
         }
+        // Apply basic rate limit delay (blocking) before issuing request
+        applyPreRequestRateLimitDelay();
         Map<String, String> hdrs = Map.of(
                 "Authorization", "Bearer " + tok.get().getAccessToken(),
                 "Client-Id", config.get(CoreConfigKeys.TWITCH_CLIENT_ID));
@@ -143,6 +152,40 @@ public class TwitchRestClient implements Closeable {
             }
         });
         return fut;
+    }
+
+    /**
+     * Very small MVP helper: if last captured headers indicate we are at or below 1
+     * remaining
+     * request and a reset epoch is in the future, sleep until reset plus small
+     * buffer.
+     * This is coarse (blocking) but sufficient for low-volume MVP usage.
+     */
+    private void applyPreRequestRateLimitDelay() {
+        RateLimitInfo info = lastRateLimitInfo.get();
+        if (info == null || info.remaining == null || info.resetEpochSeconds == null)
+            return;
+        if (info.remaining > 1)
+            return;
+        long nowSec = Instant.now().getEpochSecond();
+        long waitSec = info.resetEpochSeconds - nowSec;
+        if (waitSec <= 0 || waitSec > 30) { // ignore long waits (>30s) here
+            return;
+        }
+        if (!rateLimitSleepLock.tryLock()) {
+            // Another thread already handling the wait
+            return;
+        }
+        try {
+            long millis = Duration.ofSeconds(waitSec).toMillis() + 150; // small buffer
+            try {
+                Thread.sleep(millis);
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+            }
+        } finally {
+            rateLimitSleepLock.unlock();
+        }
     }
 
     private void captureRateLimitHeaders(Response response) {
