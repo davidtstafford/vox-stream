@@ -37,20 +37,63 @@
             <content>
               <AnchorPane minHeight="0.0" minWidth="0.0">
                      <children>
-                        <VBox alignment="CENTER" spacing="20.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <VBox alignment="TOP_LEFT" spacing="12.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                            <children>
                               <Label style="-fx-font-size: 24px; -fx-font-weight: bold;" text="Platform Connections" />
-                              <Label text="Configure your streaming platform connections here." />
-                              <Button mnemonicParsing="false" prefHeight="40.0" prefWidth="200.0" style="-fx-font-size: 14px;" text="Add Twitch Connection" />
-                              <Separator />
-                              <TableView prefHeight="300.0" prefWidth="600.0">
+                              <Label text="Configure and monitor your platform connections." />
+                              <HBox spacing="10.0">
+                                <children>
+                                  <Button fx:id="connectSelectedButton" text="Connect" onAction="#handleConnectSelected" />
+                                  <Button fx:id="disconnectSelectedButton" text="Disconnect" onAction="#handleDisconnectSelected" />
+                                  <Button fx:id="reconnectSelectedButton" text="Force Reconnect" onAction="#handleReconnectSelected" />
+                                  <Button fx:id="refreshConnectionsButton" text="Refresh" onAction="#handleRefreshConnections" />
+                                </children>
+                              </HBox>
+                              <TableView fx:id="connectionsTable" prefHeight="260.0" prefWidth="800.0">
                                 <columns>
-                                  <TableColumn prefWidth="150.0" text="Platform" />
-                                  <TableColumn prefWidth="200.0" text="Username" />
-                                    <TableColumn prefWidth="100.0" text="Status" />
-                                    <TableColumn prefWidth="150.0" text="Actions" />
+                                  <TableColumn fx:id="platformCol" prefWidth="120.0" text="Platform" />
+                                  <TableColumn fx:id="userCol" prefWidth="180.0" text="User" />
+                                  <TableColumn fx:id="statusCol" prefWidth="120.0" text="Status" />
+                                  <TableColumn fx:id="sinceCol" prefWidth="140.0" text="Connected Since" />
+                                  <TableColumn fx:id="retriesCol" prefWidth="100.0" text="Retries" />
+                                  <TableColumn fx:id="actionsCol" prefWidth="140.0" text="Actions" />
                                 </columns>
                               </TableView>
+                              <TitledPane text="Twitch Credentials" expanded="false">
+                                <content>
+                                  <VBox spacing="8.0" padding="10.0">
+                                    <children>
+                                      <HBox spacing="6.0">
+                                        <children>
+                                          <Label text="Client ID:" />
+                                          <TextField fx:id="twitchClientIdField" promptText="Enter Client ID" prefWidth="260.0" />
+                                        </children>
+                                      </HBox>
+                                      <HBox spacing="6.0">
+                                        <children>
+                                          <Label text="Client Secret:" />
+                                          <PasswordField fx:id="twitchClientSecretField" promptText="Enter Client Secret" prefWidth="260.0" />
+                                        </children>
+                                      </HBox>
+                                      <HBox spacing="6.0">
+                                        <children>
+                                          <Label text="Scopes (comma):" />
+                                          <TextField fx:id="twitchScopesField" promptText="user:read:email,channel:read:subscriptions" prefWidth="320.0" />
+                                        </children>
+                                      </HBox>
+                                      <HBox spacing="8.0">
+                                        <children>
+                                          <Label text="Redirect Port:" />
+                                          <TextField fx:id="twitchRedirectPortField" promptText="3300" prefWidth="80.0" />
+                                          <Button text="Save Twitch Config" onAction="#handleSaveTwitchConfig" />
+                                          <Button text="Sign Out" onAction="#handleTwitchSignOut" />
+                                        </children>
+                                      </HBox>
+                                      <Label fx:id="twitchConfigStatusLabel" textFill="GRAY" text="" />
+                                    </children>
+                                  </VBox>
+                                </content>
+                              </TitledPane>
                            </children>
                            <padding>
                               <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />

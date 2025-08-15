@@ -240,6 +240,10 @@ public class PlatformConnectionManager {
         }
     }
 
+    public java.util.Optional<com.voxstream.platform.api.PlatformConnection> connection(String platformId) {
+        return java.util.Optional.ofNullable(states.get(platformId)).map(s -> s.connection);
+    }
+
     public static record SummaryRow(String platformId, PlatformStatus.State state, boolean fatal, long connects,
             long failedAttempts, int backoffMs) {
     }

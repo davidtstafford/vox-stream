@@ -229,14 +229,14 @@ VoxStream is a Java-based application with a Java frontend and backend that inte
 Phase 3.2 status: COMPLETE (All core Twitch integration goals met; chat & viewer join/leave events explicitly deferred to later phase.)
 
 ### 3.3 Connection Management UI
-- [ ] Create connection configuration screen
-  - [ ] Table: Platform | Status | Last Connected | Retries | Actions
-  - [ ] (TODO) Wire table to PlatformConnectionManager snapshot + live status event subscription
-- [ ] Add platform selection interface (combo + add button for future platforms)
-- [ ] Implement credential input forms (dynamic for selected platform)
+- [x] Create connection configuration screen (initial table + controls scaffolded)
+  - [ ] Table: Platform | Status | Last Connected | Retries | Actions (columns added, actions wiring partial)
+  - [ ] (TODO) Wire table to PlatformConnectionManager snapshot + live status event subscription (initial refresh + event subscription implemented)
+- [x] Add platform selection interface (basic Twitch-only controls; multi-platform selector pending)
+- [x] Implement credential input forms (Twitch clientId/secret/scopes/redirect fields added)
 - [ ] Add connection status indicators (color/icon bound to status)
 - [ ] Create connection testing functionality (invoke healthCheck())
-- [ ] Implement sign-out functionality (revoke tokens, clear credentials)
+- [ ] Implement sign-out functionality (revoke tokens, clear credentials) (basic secret clearing added; full revoke pending)
 - [ ] Live log panel (filter on connection-related events)
 - [ ] Tests: UI controller unit tests (where feasible) + manual checklist
 

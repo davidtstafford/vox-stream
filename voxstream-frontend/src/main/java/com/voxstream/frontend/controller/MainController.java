@@ -16,12 +16,22 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.voxstream.core.bus.EventBus;
+import com.voxstream.core.bus.EventSubscription;
 import com.voxstream.core.config.ConfigurationService;
 import com.voxstream.core.config.VoxStreamConfiguration;
 import com.voxstream.core.config.keys.CoreConfigKeys;
 import com.voxstream.core.config.profile.ProfileService;
+import com.voxstream.core.event.Event;
+import com.voxstream.core.event.EventType;
+import com.voxstream.core.platform.PlatformConnectionManager;
+import com.voxstream.platform.api.PlatformStatus;
 
 import javafx.application.Platform;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
@@ -37,7 +47,10 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
 
@@ -87,14 +100,45 @@ public class MainController implements Initializable {
     @FXML
     private TextField newProfileNameField;
 
+    // Connection management UI
+    @FXML
+    private TableView<ConnectionRow> connectionsTable;
+    @FXML
+    private TableColumn<ConnectionRow, String> platformCol;
+    @FXML
+    private TableColumn<ConnectionRow, String> userCol;
+    @FXML
+    private TableColumn<ConnectionRow, String> statusCol;
+    @FXML
+    private TableColumn<ConnectionRow, String> sinceCol;
+    @FXML
+    private TableColumn<ConnectionRow, String> retriesCol;
+    @FXML
+    private TextField twitchClientIdField;
+    @FXML
+    private TextField twitchClientSecretField;
+    @FXML
+    private TextField twitchScopesField;
+    @FXML
+    private TextField twitchRedirectPortField;
+    @FXML
+    private Label twitchConfigStatusLabel;
+
     @Autowired
     private VoxStreamConfiguration configuration;
     @Autowired
     private ConfigurationService configurationService;
     @Autowired
     private ProfileService profileService;
+    @Autowired
+    private PlatformConnectionManager platformConnectionManager;
+    @Autowired
+    private EventBus eventBus;
 
     private String currentExportHashCached = "";
+    private final ObservableList<ConnectionRow> connectionRows = FXCollections.observableArrayList();
+    @SuppressWarnings("unused")
+    private com.voxstream.core.bus.SubscriptionHandle statusSubHandle;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -104,9 +148,12 @@ public class MainController implements Initializable {
         setupTabPane();
         setupStatusBar();
         initSettingsControls();
+        initConnectionTable();
         refreshExportHashCache();
         refreshProfiles();
         highlightDefaultProfile();
+        loadTwitchConfigFields();
+        startPlatformStatusSubscription();
 
         // Update status
         updateStatus("Application Ready", false);
@@ -204,6 +251,202 @@ public class MainController implements Initializable {
         if (enableCorsCheckbox != null) {
             enableCorsCheckbox.setSelected(configurationService.get(CoreConfigKeys.WEB_OUTPUT_ENABLE_CORS));
         }
+    }
+
+    private void initConnectionTable() {
+        if (connectionsTable == null)
+            return;
+        platformCol.setCellValueFactory(new PropertyValueFactory<>("platform"));
+        userCol.setCellValueFactory(new PropertyValueFactory<>("user"));
+        statusCol.setCellValueFactory(new PropertyValueFactory<>("status"));
+        sinceCol.setCellValueFactory(new PropertyValueFactory<>("connectedSince"));
+        retriesCol.setCellValueFactory(new PropertyValueFactory<>("retries"));
+        connectionsTable.setItems(connectionRows);
+        refreshConnections();
+    }
+
+    private void refreshConnections() {
+        connectionRows.clear();
+        var st = platformConnectionManager.status("twitch");
+        String user = configurationService.get(CoreConfigKeys.TWITCH_CLIENT_ID) != null
+                ? configurationService.get(CoreConfigKeys.TWITCH_CLIENT_ID)
+                : "";
+        connectionRows.add(new ConnectionRow("twitch", user, st));
+    }
+
+    private void startPlatformStatusSubscription() {
+        statusSubHandle = eventBus
+                .subscribe(new EventSubscription(e -> e.getType() == EventType.SYSTEM, this::handleSystemEvent, 0));
+    }
+
+    private void handleSystemEvent(Event e) {
+        Platform.runLater(() -> {
+            refreshConnections();
+        });
+    }
+
+    private void refreshExportHashCache() {
+        try {
+            Map<String, Object> data = new HashMap<>();
+            for (var key : CoreConfigKeys.ALL) {
+                @SuppressWarnings("unchecked")
+                var typed = (com.voxstream.core.config.keys.ConfigKey<Object>) key;
+                Object val = configurationService.get(typed);
+                data.put(key.getName(), val);
+            }
+            String json = toJson(data);
+            currentExportHashCached = configurationService.get(CoreConfigKeys.LAST_EXPORT_HASH);
+            String currentHash = sha256(json);
+            if (!currentExportHashCached.equals(currentHash)) {
+                updateStatus("Settings changed since last export", false);
+            }
+        } catch (Exception e) {
+            logger.debug("Unable to refresh export hash cache: {}", e.getMessage());
+        }
+    }
+
+    private String sha256(String data) throws Exception {
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        byte[] digest = md.digest(data.getBytes(StandardCharsets.UTF_8));
+        StringBuilder sb = new StringBuilder();
+        for (byte b : digest)
+            sb.append(String.format("%02x", b));
+        return sb.toString();
+    }
+
+    private String toJson(Map<String, Object> map) {
+        return map.entrySet().stream()
+                .map(e -> "\"" + e.getKey() + "\":" + formatValue(e.getValue()))
+                .collect(Collectors.joining(",", "{", "}"));
+    }
+
+    private String formatValue(Object v) {
+        if (v instanceof Number || v instanceof Boolean)
+            return v.toString();
+        return "\"" + v.toString().replace("\\", "\\\\").replace("\"", "\\\"") + "\"";
+    }
+
+    private Map<String, Object> parseJson(FileReader reader) throws Exception {
+        // Minimal JSON object parser (flat key->primitive) to avoid extra deps in
+        // frontend module
+        StringBuilder sb = new StringBuilder();
+        char[] buf = new char[2048];
+        int r;
+        while ((r = reader.read(buf)) != -1)
+            sb.append(buf, 0, r);
+        String json = sb.toString().trim();
+        Map<String, Object> result = new HashMap<>();
+        if (json.isEmpty() || json.equals("{}"))
+            return result;
+        if (json.charAt(0) != '{' || json.charAt(json.length() - 1) != '}')
+            throw new IllegalArgumentException("Invalid JSON");
+        String body = json.substring(1, json.length() - 1).trim();
+        if (body.isEmpty())
+            return result;
+        // split by commas not inside quotes (simple approach assumes no nested
+        // structures)
+        int idx = 0;
+        boolean inStr = false;
+        StringBuilder token = new StringBuilder();
+        java.util.List<String> parts = new java.util.ArrayList<>();
+        while (idx < body.length()) {
+            char c = body.charAt(idx);
+            if (c == '"' && (idx == 0 || body.charAt(idx - 1) != '\\'))
+                inStr = !inStr;
+            if (c == ',' && !inStr) {
+                parts.add(token.toString());
+                token.setLength(0);
+            } else
+                token.append(c);
+            idx++;
+        }
+        parts.add(token.toString());
+        for (String part : parts) {
+            String[] kv = part.split(":", 2);
+            if (kv.length != 2)
+                continue;
+            String key = stripQuotes(kv[0].trim());
+            String valRaw = kv[1].trim();
+            Object val;
+            if (valRaw.equalsIgnoreCase("true") || valRaw.equalsIgnoreCase("false"))
+                val = Boolean.valueOf(valRaw);
+            else if (valRaw.matches("-?\\d+"))
+                val = Integer.valueOf(valRaw);
+            else
+                val = stripQuotes(valRaw);
+            result.put(key, val);
+        }
+        return result;
+    }
+
+    private String stripQuotes(String s) {
+        if (s.startsWith("\"") && s.endsWith("\""))
+            return s.substring(1, s.length() - 1).replace("\\\"", "\"").replace("\\\\", "\\");
+        return s;
+    }
+
+    private Object castValue(Object raw, Class<?> type) {
+        if (type == Integer.class && raw instanceof Number)
+            return ((Number) raw).intValue();
+        if (type == Boolean.class && raw instanceof Boolean)
+            return raw;
+        if (type == String.class)
+            return String.valueOf(raw);
+        throw new IllegalArgumentException("Unsupported type for import: " + type.getSimpleName());
+    }
+
+    @FXML
+    private void handleConnectionsTab() {
+        logger.debug("Connections tab selected");
+        updateStatus("Configure streaming platform connections", false);
+    }
+
+    @FXML
+    private void handleEventsTab() {
+        logger.debug("Events tab selected");
+        updateStatus("View live events and history", false);
+    }
+
+    @FXML
+    private void handleTTSTab() {
+        logger.debug("TTS tab selected");
+        updateStatus("Configure Text-to-Speech settings", false);
+    }
+
+    @FXML
+    private void handleViewersTab() {
+        logger.debug("Viewers tab selected");
+        updateStatus("Manage viewers and permissions", false);
+    }
+
+    @FXML
+    private void handleSettingsTab() {
+        logger.debug("Settings tab selected");
+        updateStatus("Application settings and preferences", false);
+    }
+
+    /**
+     * Enable tabs after successful platform connection
+     */
+    public void enableTabs() {
+        Platform.runLater(() -> {
+            eventsTab.setDisable(false);
+            ttsTab.setDisable(false);
+            viewersTab.setDisable(false);
+            updateStatus("Connected - All features available", false);
+        });
+    }
+
+    /**
+     * Disable tabs when platform connection is lost
+     */
+    public void disableTabs() {
+        Platform.runLater(() -> {
+            eventsTab.setDisable(true);
+            ttsTab.setDisable(true);
+            viewersTab.setDisable(true);
+            updateStatus("Disconnected - Limited functionality", false);
+        });
     }
 
     @FXML
@@ -435,167 +678,111 @@ public class MainController implements Initializable {
         }
     }
 
-    private void refreshExportHashCache() {
+    // --- ConnectionRow model ---
+    public static class ConnectionRow {
+        private final SimpleStringProperty platform;
+        private final SimpleStringProperty user;
+        private final SimpleStringProperty status;
+        private final SimpleStringProperty connectedSince;
+        private final SimpleIntegerProperty retries;
+
+        public ConnectionRow(String platform, String user, PlatformStatus st) {
+            this.platform = new SimpleStringProperty(platform);
+            this.user = new SimpleStringProperty(user);
+            this.status = new SimpleStringProperty(st.state().name());
+            this.connectedSince = new SimpleStringProperty(st.connectedSinceEpochMs() > 0
+                    ? java.time.Instant.ofEpochMilli(st.connectedSinceEpochMs()).toString()
+                    : "-");
+            this.retries = new SimpleIntegerProperty(0); // TODO populate from metrics
+        }
+
+        public String getPlatform() {
+            return platform.get();
+        }
+
+        public String getUser() {
+            return user.get();
+        }
+
+        public String getStatus() {
+            return status.get();
+        }
+
+        public String getConnectedSince() {
+            return connectedSince.get();
+        }
+
+        public int getRetries() {
+            return retries.get();
+        }
+    }
+
+    @FXML
+    private void handleRefreshConnections() {
+        refreshConnections();
+    }
+
+    @FXML
+    private void handleConnectSelected() {
+        ConnectionRow row = connectionsTable.getSelectionModel().getSelectedItem();
+        if (row == null)
+            return;
+        platformConnectionManager.connection(row.getPlatform()).ifPresent(c -> c.connect());
+    }
+
+    @FXML
+    private void handleDisconnectSelected() {
+        ConnectionRow row = connectionsTable.getSelectionModel().getSelectedItem();
+        if (row == null)
+            return;
+        platformConnectionManager.connection(row.getPlatform()).ifPresent(c -> c.disconnect());
+    }
+
+    @FXML
+    private void handleReconnectSelected() {
+        ConnectionRow row = connectionsTable.getSelectionModel().getSelectedItem();
+        if (row == null)
+            return;
+        platformConnectionManager.connection(row.getPlatform()).ifPresent(c -> {
+            c.disconnect();
+            c.connect();
+        });
+    }
+
+    private void loadTwitchConfigFields() {
+        if (twitchClientIdField != null)
+            twitchClientIdField.setText(configurationService.get(CoreConfigKeys.TWITCH_CLIENT_ID));
+        if (twitchClientSecretField != null)
+            twitchClientSecretField.setText(configurationService.get(CoreConfigKeys.TWITCH_CLIENT_SECRET));
+        if (twitchScopesField != null)
+            twitchScopesField.setText(configurationService.get(CoreConfigKeys.TWITCH_SCOPES));
+        if (twitchRedirectPortField != null)
+            twitchRedirectPortField
+                    .setText(String.valueOf(configurationService.get(CoreConfigKeys.TWITCH_REDIRECT_PORT)));
+    }
+
+    @FXML
+    private void handleSaveTwitchConfig() {
         try {
-            Map<String, Object> data = new HashMap<>();
-            for (var key : CoreConfigKeys.ALL) {
-                @SuppressWarnings("unchecked")
-                var typed = (com.voxstream.core.config.keys.ConfigKey<Object>) key;
-                Object val = configurationService.get(typed);
-                data.put(key.getName(), val);
-            }
-            String json = toJson(data);
-            currentExportHashCached = configurationService.get(CoreConfigKeys.LAST_EXPORT_HASH);
-            String currentHash = sha256(json);
-            if (!currentExportHashCached.equals(currentHash)) {
-                updateStatus("Settings changed since last export", false);
-            }
-        } catch (Exception e) {
-            logger.debug("Unable to refresh export hash cache: {}", e.getMessage());
+            configurationService.set(CoreConfigKeys.TWITCH_CLIENT_ID, twitchClientIdField.getText().trim());
+            configurationService.set(CoreConfigKeys.TWITCH_CLIENT_SECRET, twitchClientSecretField.getText().trim());
+            configurationService.set(CoreConfigKeys.TWITCH_SCOPES, twitchScopesField.getText().trim());
+            configurationService.set(CoreConfigKeys.TWITCH_REDIRECT_PORT,
+                    Integer.parseInt(twitchRedirectPortField.getText().trim()));
+            twitchConfigStatusLabel.setText("Saved");
+        } catch (Exception ex) {
+            twitchConfigStatusLabel.setText("Error: " + ex.getMessage());
         }
     }
 
-    private String sha256(String data) throws Exception {
-        MessageDigest md = MessageDigest.getInstance("SHA-256");
-        byte[] digest = md.digest(data.getBytes(StandardCharsets.UTF_8));
-        StringBuilder sb = new StringBuilder();
-        for (byte b : digest)
-            sb.append(String.format("%02x", b));
-        return sb.toString();
-    }
-
-    private String toJson(Map<String, Object> map) {
-        return map.entrySet().stream()
-                .map(e -> "\"" + e.getKey() + "\":" + formatValue(e.getValue()))
-                .collect(Collectors.joining(",", "{", "}"));
-    }
-
-    private String formatValue(Object v) {
-        if (v instanceof Number || v instanceof Boolean)
-            return v.toString();
-        return "\"" + v.toString().replace("\\", "\\\\").replace("\"", "\\\"") + "\"";
-    }
-
-    private Map<String, Object> parseJson(FileReader reader) throws Exception {
-        // Minimal JSON object parser (flat key->primitive) to avoid extra deps in
-        // frontend module
-        StringBuilder sb = new StringBuilder();
-        char[] buf = new char[2048];
-        int r;
-        while ((r = reader.read(buf)) != -1)
-            sb.append(buf, 0, r);
-        String json = sb.toString().trim();
-        Map<String, Object> result = new HashMap<>();
-        if (json.isEmpty() || json.equals("{}"))
-            return result;
-        if (json.charAt(0) != '{' || json.charAt(json.length() - 1) != '}')
-            throw new IllegalArgumentException("Invalid JSON");
-        String body = json.substring(1, json.length() - 1).trim();
-        if (body.isEmpty())
-            return result;
-        // split by commas not inside quotes (simple approach assumes no nested
-        // structures)
-        int idx = 0;
-        boolean inStr = false;
-        StringBuilder token = new StringBuilder();
-        java.util.List<String> parts = new java.util.ArrayList<>();
-        while (idx < body.length()) {
-            char c = body.charAt(idx);
-            if (c == '"' && (idx == 0 || body.charAt(idx - 1) != '\\'))
-                inStr = !inStr;
-            if (c == ',' && !inStr) {
-                parts.add(token.toString());
-                token.setLength(0);
-            } else
-                token.append(c);
-            idx++;
+    @FXML
+    private void handleTwitchSignOut() {
+        try {
+            configurationService.set(CoreConfigKeys.TWITCH_CLIENT_SECRET, "");
+            twitchClientSecretField.setText("");
+            twitchConfigStatusLabel.setText("Signed out");
+        } catch (Exception ex) {
+            twitchConfigStatusLabel.setText("Error: " + ex.getMessage());
         }
-        parts.add(token.toString());
-        for (String part : parts) {
-            String[] kv = part.split(":", 2);
-            if (kv.length != 2)
-                continue;
-            String key = stripQuotes(kv[0].trim());
-            String valRaw = kv[1].trim();
-            Object val;
-            if (valRaw.equalsIgnoreCase("true") || valRaw.equalsIgnoreCase("false"))
-                val = Boolean.valueOf(valRaw);
-            else if (valRaw.matches("-?\\d+"))
-                val = Integer.valueOf(valRaw);
-            else
-                val = stripQuotes(valRaw);
-            result.put(key, val);
-        }
-        return result;
-    }
-
-    private String stripQuotes(String s) {
-        if (s.startsWith("\"") && s.endsWith("\""))
-            return s.substring(1, s.length() - 1).replace("\\\"", "\"").replace("\\\\", "\\");
-        return s;
-    }
-
-    private Object castValue(Object raw, Class<?> type) {
-        if (type == Integer.class && raw instanceof Number)
-            return ((Number) raw).intValue();
-        if (type == Boolean.class && raw instanceof Boolean)
-            return raw;
-        if (type == String.class)
-            return String.valueOf(raw);
-        throw new IllegalArgumentException("Unsupported type for import: " + type.getSimpleName());
-    }
-
-    @FXML
-    private void handleConnectionsTab() {
-        logger.debug("Connections tab selected");
-        updateStatus("Configure streaming platform connections", false);
-    }
-
-    @FXML
-    private void handleEventsTab() {
-        logger.debug("Events tab selected");
-        updateStatus("View live events and history", false);
-    }
-
-    @FXML
-    private void handleTTSTab() {
-        logger.debug("TTS tab selected");
-        updateStatus("Configure Text-to-Speech settings", false);
-    }
-
-    @FXML
-    private void handleViewersTab() {
-        logger.debug("Viewers tab selected");
-        updateStatus("Manage viewers and permissions", false);
-    }
-
-    @FXML
-    private void handleSettingsTab() {
-        logger.debug("Settings tab selected");
-        updateStatus("Application settings and preferences", false);
-    }
-
-    /**
-     * Enable tabs after successful platform connection
-     */
-    public void enableTabs() {
-        Platform.runLater(() -> {
-            eventsTab.setDisable(false);
-            ttsTab.setDisable(false);
-            viewersTab.setDisable(false);
-            updateStatus("Connected - All features available", false);
-        });
-    }
-
-    /**
-     * Disable tabs when platform connection is lost
-     */
-    public void disableTabs() {
-        Platform.runLater(() -> {
-            eventsTab.setDisable(true);
-            ttsTab.setDisable(true);
-            viewersTab.setDisable(true);
-            updateStatus("Disconnected - Limited functionality", false);
-        });
     }
 }

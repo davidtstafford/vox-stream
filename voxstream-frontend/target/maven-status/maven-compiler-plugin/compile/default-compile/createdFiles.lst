@@ -1,7 +1,7 @@
+com/voxstream/frontend/VoxStreamApplication.class
 com/voxstream/frontend/VoxStreamPreloader.class
 com/voxstream/frontend/service/ApplicationLauncher.class
 com/voxstream/frontend/controller/MainController.class
 com/voxstream/frontend/controller/MainController$1.class
 com/voxstream/frontend/service/ErrorHandler.class
-com/voxstream/frontend/VoxStreamApplication.class
 com/voxstream/frontend/JavaFXLauncher.class
