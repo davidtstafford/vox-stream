@@ -1,0 +1,73 @@
+# Maven build output
+**/target/
+
+# IntelliJ / IDEA
+.idea/
+*.iml
+out/
+
+# VS Code workspace artifacts (keep specific JSON if desired)
+.vscode/
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# Java / JVM
+*.class
+hs_err_pid*
+replay_pid*
+*.hprof
+
+# Logs & runtime artifacts
+logs/
+**/logs/
+*.log
+
+# OS / Finder
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+~$*
+
+# Dependency shading / temporary POMs
+dependency-reduced-pom.xml
+
+# Coverage / reports
+**/jacoco.exec
+**/jacoco*.xml
+**/surefire-reports/
+**/failsafe-reports/
+
+# Local environment / credentials (add actual filenames if created later)
+.env
+*.local.properties
+
+# Packaged installers / artifacts
+*.dmg
+*.pkg
+*.exe
+*.msi
+*.zip
+
+# JavaFX / jpackage output directories (if created)
+**/jpackage-output/
+
+# Ignore macOS metadata everywhere
+**/.DS_Store
+
+# Docker mutable data (add paths if you create bind-mounted state dirs)
+# e.g. docker-data/
+
+# Node / web build artifacts (future web output module if added)
+node_modules/
+**/dist/
+
+# Backup files
+*.bak
+*.orig
