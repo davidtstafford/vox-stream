@@ -25,16 +25,19 @@ import com.voxstream.core.config.profile.ProfileService;
 import com.voxstream.core.event.Event;
 import com.voxstream.core.event.EventType;
 import com.voxstream.core.platform.PlatformConnectionManager;
+import com.voxstream.core.twitch.oauth.TwitchOAuthService;
 import com.voxstream.platform.api.PlatformStatus;
 
 import javafx.application.Platform;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Label;
@@ -47,11 +50,15 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
 
 /**
@@ -114,6 +121,10 @@ public class MainController implements Initializable {
     @FXML
     private TableColumn<ConnectionRow, String> retriesCol;
     @FXML
+    private TableColumn<ConnectionRow, String> backoffCol;
+    @FXML
+    private TableColumn<ConnectionRow, Void> actionsCol;
+    @FXML
     private TextField twitchClientIdField;
     @FXML
     private TextField twitchClientSecretField;
@@ -123,6 +134,18 @@ public class MainController implements Initializable {
     private TextField twitchRedirectPortField;
     @FXML
     private Label twitchConfigStatusLabel;
+
+    // System log UI
+    @FXML
+    private TableView<SystemLogRow> systemLogTable;
+    @FXML
+    private TableColumn<SystemLogRow, String> logTimeCol;
+    @FXML
+    private TableColumn<SystemLogRow, String> logPlatformCol;
+    @FXML
+    private TableColumn<SystemLogRow, String> logStateCol;
+    @FXML
+    private TableColumn<SystemLogRow, String> logDetailCol;
 
     @Autowired
     private VoxStreamConfiguration configuration;
@@ -134,11 +157,14 @@ public class MainController implements Initializable {
     private PlatformConnectionManager platformConnectionManager;
     @Autowired
     private EventBus eventBus;
+    @Autowired
+    private TwitchOAuthService twitchOAuthService;
 
     private String currentExportHashCached = "";
     private final ObservableList<ConnectionRow> connectionRows = FXCollections.observableArrayList();
-    @SuppressWarnings("unused")
+    private final ObservableList<SystemLogRow> systemLogRows = FXCollections.observableArrayList();
     private com.voxstream.core.bus.SubscriptionHandle statusSubHandle;
+    private com.voxstream.core.bus.SubscriptionHandle systemLogSubHandle;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -149,11 +175,13 @@ public class MainController implements Initializable {
         setupStatusBar();
         initSettingsControls();
         initConnectionTable();
+        initSystemLogTable();
         refreshExportHashCache();
         refreshProfiles();
         highlightDefaultProfile();
         loadTwitchConfigFields();
         startPlatformStatusSubscription();
+        startSystemLogSubscription();
 
         // Update status
         updateStatus("Application Ready", false);
@@ -259,19 +287,116 @@ public class MainController implements Initializable {
         platformCol.setCellValueFactory(new PropertyValueFactory<>("platform"));
         userCol.setCellValueFactory(new PropertyValueFactory<>("user"));
         statusCol.setCellValueFactory(new PropertyValueFactory<>("status"));
+        // Add icon/emojis to status column for clearer visual indicators
+        statusCol.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                    setGraphic(null);
+                } else {
+                    setText(statusEmoji(item) + " " + item);
+                }
+            }
+        });
         sinceCol.setCellValueFactory(new PropertyValueFactory<>("connectedSince"));
         retriesCol.setCellValueFactory(new PropertyValueFactory<>("retries"));
+        if (backoffCol != null) {
+            backoffCol.setCellValueFactory(new PropertyValueFactory<>("backoffMs"));
+        }
+        setupActionsColumn();
         connectionsTable.setItems(connectionRows);
         refreshConnections();
+    }
+
+    private void setupActionsColumn() {
+        if (actionsCol == null)
+            return;
+        actionsCol.setCellFactory(col -> new TableCell<>() {
+            private final Button connectBtn = new Button("Connect");
+            private final Button disconnectBtn = new Button("Disconnect");
+            private final Button reconnectBtn = new Button("Reconnect");
+            private final Button healthBtn = new Button("Health");
+            private final HBox box = new HBox(4, connectBtn, disconnectBtn, reconnectBtn, healthBtn);
+            {
+                connectBtn.setOnAction(e -> {
+                    ConnectionRow row = getTableView().getItems().get(getIndex());
+                    platformConnectionManager.connection(row.getPlatform()).ifPresent(c -> c.connect());
+                });
+                disconnectBtn.setOnAction(e -> {
+                    ConnectionRow row = getTableView().getItems().get(getIndex());
+                    platformConnectionManager.connection(row.getPlatform()).ifPresent(c -> c.disconnect());
+                });
+                reconnectBtn.setOnAction(e -> {
+                    ConnectionRow row = getTableView().getItems().get(getIndex());
+                    platformConnectionManager.connection(row.getPlatform()).ifPresent(c -> {
+                        c.disconnect();
+                        c.connect();
+                    });
+                });
+                healthBtn.setOnAction(e -> {
+                    ConnectionRow row = getTableView().getItems().get(getIndex());
+                    platformConnectionManager.connection(row.getPlatform()).ifPresent(c -> {
+                        c.healthCheck().whenComplete((ok, ex) -> Platform.runLater(() -> {
+                            String msg = ok != null && ok ? "healthy" : "unhealthy";
+                            updateStatus(row.getPlatform() + " health: " + msg, false);
+                        }));
+                    });
+                });
+                box.setFillHeight(true);
+            }
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    ConnectionRow row = getTableView().getItems().get(getIndex());
+                    boolean connected = row.getStatus().equals("CONNECTED");
+                    connectBtn.setDisable(connected);
+                    disconnectBtn.setDisable(!connected);
+                    reconnectBtn.setDisable(false);
+                    setGraphic(box);
+                }
+            }
+        });
     }
 
     private void refreshConnections() {
         connectionRows.clear();
         var st = platformConnectionManager.status("twitch");
+        var metrics = platformConnectionManager.metrics("twitch");
         String user = configurationService.get(CoreConfigKeys.TWITCH_CLIENT_ID) != null
                 ? configurationService.get(CoreConfigKeys.TWITCH_CLIENT_ID)
                 : "";
-        connectionRows.add(new ConnectionRow("twitch", user, st));
+        connectionRows.add(new ConnectionRow("twitch", user, st, metrics));
+        // Apply simple status coloring via row factory
+        if (connectionsTable != null && connectionsTable.getRowFactory() == null) {
+            connectionsTable.setRowFactory(tv -> new javafx.scene.control.TableRow<>() {
+                @Override
+                protected void updateItem(ConnectionRow item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty || item == null) {
+                        setStyle("");
+                        setTooltip(null);
+                    } else {
+                        String state = item.getStatus();
+                        String color;
+                        switch (state) {
+                            case "CONNECTED" -> color = "#c8f7c5"; // light green
+                            case "CONNECTING" -> color = "#fff4c2"; // light yellow
+                            case "FAILED" -> color = "#f7c5c5"; // light red
+                            case "RECONNECT_SCHEDULED" -> color = "#e0d7ff"; // light purple
+                            default -> color = "white";
+                        }
+                        setStyle("-fx-background-color: " + color + ";");
+                        setTooltip(new Tooltip(item.statusDetail));
+                    }
+                }
+            });
+        }
     }
 
     private void startPlatformStatusSubscription() {
@@ -283,6 +408,64 @@ public class MainController implements Initializable {
         Platform.runLater(() -> {
             refreshConnections();
         });
+    }
+
+    private void initSystemLogTable() {
+        if (systemLogTable == null)
+            return;
+        if (logTimeCol != null)
+            logTimeCol.setCellValueFactory(new PropertyValueFactory<>("time"));
+        if (logPlatformCol != null)
+            logPlatformCol.setCellValueFactory(new PropertyValueFactory<>("platform"));
+        if (logStateCol != null)
+            logStateCol.setCellValueFactory(new PropertyValueFactory<>("state"));
+        if (logDetailCol != null)
+            logDetailCol.setCellValueFactory(new PropertyValueFactory<>("detail"));
+        systemLogTable.setItems(systemLogRows);
+        systemLogTable.setRowFactory(tv -> new TableRow<>() {
+            @Override
+            protected void updateItem(SystemLogRow item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setStyle("");
+                } else {
+                    String state = item.getState();
+                    String color = switch (state) {
+                        case "CONNECTED" -> "#c8f7c5";
+                        case "CONNECTING" -> "#fff4c2";
+                        case "FAILED" -> "#f7c5c5";
+                        case "RECONNECT_SCHEDULED" -> "#e0d7ff";
+                        default -> "white";
+                    };
+                    setStyle("-fx-background-color: " + color + ";");
+                }
+            }
+        });
+    }
+
+    private void startSystemLogSubscription() {
+        systemLogSubHandle = eventBus
+                .subscribe(new EventSubscription(e -> e.getType() == EventType.SYSTEM, this::appendSystemLog, -10));
+    }
+
+    private void appendSystemLog(Event e) {
+        Platform.runLater(() -> {
+            try {
+                String platform = String.valueOf(e.getPayload().getOrDefault("platform", e.getSourcePlatform()));
+                String state = String.valueOf(e.getPayload().getOrDefault("state", "?"));
+                String detail = String.valueOf(e.getPayload().getOrDefault("detail", ""));
+                systemLogRows.add(0, new SystemLogRow(System.currentTimeMillis(), platform, state, detail));
+                if (systemLogRows.size() > 200)
+                    systemLogRows.remove(systemLogRows.size() - 1);
+            } catch (Exception ex) {
+                logger.debug("Failed to append system log: {}", ex.getMessage());
+            }
+        });
+    }
+
+    @FXML
+    private void handleClearSystemLog() {
+        systemLogRows.clear();
     }
 
     private void refreshExportHashCache() {
@@ -685,15 +868,20 @@ public class MainController implements Initializable {
         private final SimpleStringProperty status;
         private final SimpleStringProperty connectedSince;
         private final SimpleIntegerProperty retries;
+        private final SimpleIntegerProperty backoffMs;
+        private final String statusDetail;
 
-        public ConnectionRow(String platform, String user, PlatformStatus st) {
+        public ConnectionRow(String platform, String user, PlatformStatus st,
+                com.voxstream.core.platform.PlatformConnectionManager.Metrics m) {
             this.platform = new SimpleStringProperty(platform);
             this.user = new SimpleStringProperty(user);
             this.status = new SimpleStringProperty(st.state().name());
             this.connectedSince = new SimpleStringProperty(st.connectedSinceEpochMs() > 0
                     ? java.time.Instant.ofEpochMilli(st.connectedSinceEpochMs()).toString()
                     : "-");
-            this.retries = new SimpleIntegerProperty(0); // TODO populate from metrics
+            this.retries = new SimpleIntegerProperty((int) m.failedAttempts);
+            this.backoffMs = new SimpleIntegerProperty(m.currentBackoffMs);
+            this.statusDetail = st.detail();
         }
 
         public String getPlatform() {
@@ -714,6 +902,42 @@ public class MainController implements Initializable {
 
         public int getRetries() {
             return retries.get();
+        }
+
+        public int getBackoffMs() {
+            return backoffMs.get();
+        }
+    }
+
+    public static class SystemLogRow {
+        private final SimpleLongProperty epoch = new SimpleLongProperty();
+        private final SimpleStringProperty time = new SimpleStringProperty();
+        private final SimpleStringProperty platform = new SimpleStringProperty();
+        private final SimpleStringProperty state = new SimpleStringProperty();
+        private final SimpleStringProperty detail = new SimpleStringProperty();
+
+        public SystemLogRow(long epochMs, String platform, String state, String detail) {
+            this.epoch.set(epochMs);
+            this.time.set(java.time.Instant.ofEpochMilli(epochMs).toString());
+            this.platform.set(platform);
+            this.state.set(state);
+            this.detail.set(detail);
+        }
+
+        public String getTime() {
+            return time.get();
+        }
+
+        public String getPlatform() {
+            return platform.get();
+        }
+
+        public String getState() {
+            return state.get();
+        }
+
+        public String getDetail() {
+            return detail.get();
         }
     }
 
@@ -776,13 +1000,27 @@ public class MainController implements Initializable {
     }
 
     @FXML
-    private void handleTwitchSignOut() {
+    void handleTwitchSignOut() { // visibility relaxed for test access
         try {
+            twitchOAuthService.revokeAndDeleteTokens();
             configurationService.set(CoreConfigKeys.TWITCH_CLIENT_SECRET, "");
             twitchClientSecretField.setText("");
             twitchConfigStatusLabel.setText("Signed out");
+            updateStatus("Twitch credentials revoked", false);
+            refreshConnections();
         } catch (Exception ex) {
             twitchConfigStatusLabel.setText("Error: " + ex.getMessage());
         }
+    }
+
+    private String statusEmoji(String state) {
+        return switch (state) {
+            case "CONNECTED" -> "✅";
+            case "CONNECTING" -> "⏳";
+            case "FAILED" -> "❌";
+            case "RECONNECT_SCHEDULED" -> "🔁";
+            case "DISCONNECTED" -> "⛔";
+            default -> "⬜";
+        };
     }
 }

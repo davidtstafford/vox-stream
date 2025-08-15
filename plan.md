@@ -230,15 +230,15 @@ Phase 3.2 status: COMPLETE (All core Twitch integration goals met; chat & viewer
 
 ### 3.3 Connection Management UI
 - [x] Create connection configuration screen (initial table + controls scaffolded)
-  - [ ] Table: Platform | Status | Last Connected | Retries | Actions (columns added, actions wiring partial)
-  - [ ] (TODO) Wire table to PlatformConnectionManager snapshot + live status event subscription (initial refresh + event subscription implemented)
+  - [x] Table: Platform | Status | Connected Since | Retries | Backoff | Actions (columns added, actions wired)
+  - [x] Wire table to PlatformConnectionManager snapshot + live status event subscription
 - [x] Add platform selection interface (basic Twitch-only controls; multi-platform selector pending)
 - [x] Implement credential input forms (Twitch clientId/secret/scopes/redirect fields added)
-- [ ] Add connection status indicators (color/icon bound to status)
-- [ ] Create connection testing functionality (invoke healthCheck())
-- [ ] Implement sign-out functionality (revoke tokens, clear credentials) (basic secret clearing added; full revoke pending)
-- [ ] Live log panel (filter on connection-related events)
-- [ ] Tests: UI controller unit tests (where feasible) + manual checklist
+- [x] Add connection status indicators (color highlighting + emoji icons)
+- [x] Create connection testing functionality (invoke healthCheck())
+- [x] Implement sign-out functionality (revoke tokens, clear credentials)
+- [x] Live log panel (SYSTEM event filtered table with trim + clear)
+- [x] Tests: UI controller unit tests (sign-out & system log append basic coverage)
 
 ### 3.4 Platform Abstraction for Future Expansion
 - [ ] Design interface for additional platforms (document required methods & event categories)

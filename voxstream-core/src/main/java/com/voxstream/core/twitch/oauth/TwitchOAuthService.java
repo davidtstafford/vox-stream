@@ -432,4 +432,35 @@ public class TwitchOAuthService {
     private static String urlDecode(String s) {
         return java.net.URLDecoder.decode(s, StandardCharsets.UTF_8);
     }
+
+    public synchronized void revokeAndDeleteTokens() {
+        TwitchOAuthToken current = cached;
+        cached = null; // optimistic clear
+        try {
+            if (current != null && current.getAccessToken() != null && !current.getAccessToken().isBlank()) {
+                String clientId = config.get(CoreConfigKeys.TWITCH_CLIENT_ID);
+                if (clientId != null && !clientId.isBlank()) {
+                    String base = idBase.endsWith("/") ? idBase.substring(0, idBase.length() - 1) : idBase;
+                    String body = "client_id=" + encode(clientId) + "&token=" + encode(current.getAccessToken());
+                    HttpRequest req = HttpRequest.newBuilder()
+                            .uri(URI.create(base + "/oauth2/revoke"))
+                            .header("Content-Type", "application/x-www-form-urlencoded")
+                            .POST(HttpRequest.BodyPublishers.ofString(body))
+                            .build();
+                    try {
+                        http.send(req, HttpResponse.BodyHandlers.ofString()); // ignore response status (best effort)
+                    } catch (Exception e) {
+                        log.debug("Token revoke call failed (ignored): {}", e.toString());
+                    }
+                }
+            }
+        } finally {
+            try {
+                tokenDao.delete();
+            } catch (Exception e) {
+                log.debug("Failed to delete stored Twitch token: {}", e.toString());
+            }
+            notifyTokenListeners();
+        }
+    }
 }
