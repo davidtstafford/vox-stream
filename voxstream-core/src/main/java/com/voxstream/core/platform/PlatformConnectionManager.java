@@ -21,6 +21,7 @@ import com.voxstream.core.event.BaseEvent;
 import com.voxstream.core.event.EventType;
 import com.voxstream.platform.api.PlatformConnection;
 import com.voxstream.platform.api.PlatformStatus;
+import com.voxstream.platform.api.events.PlatformEvent;
 
 /**
  * Orchestrates lifecycle of platform connections providing auto-reconnect with
@@ -100,9 +101,23 @@ public class PlatformConnectionManager {
         ConnState state = states.computeIfAbsent(platformId, id -> new ConnState(conn));
         // register listener to propagate transitions (for external changes)
         conn.addStatusListener(ps -> state.lastStatus = ps);
+        // NEW: register platform event listener -> publish to EventBus (temporary
+        // mapping to UNKNOWN type)
+        conn.addPlatformEventListener(this::publishPlatformEvent);
         int initialDelay = config.get(CoreConfigKeys.PLATFORM_RECONNECT_INITIAL_DELAY_MS);
         state.lastBaseDelayMs = initialDelay; // seed base delay tracker
         attemptConnect(state, 0, initialDelay);
+    }
+
+    private void publishPlatformEvent(PlatformEvent evt) {
+        try {
+            Map<String, Object> payload = Map.of(
+                    "platformType", evt.type(),
+                    "rawTimestamp", evt.timestamp().toEpochMilli());
+            eventBus.publish(new BaseEvent(EventType.UNKNOWN, evt.platform(), payload, null));
+        } catch (Exception e) {
+            log.debug("Failed to publish platform event: {}", e.getMessage());
+        }
     }
 
     private void attemptConnect(ConnState state, int attempt, int currentDelayMs) {

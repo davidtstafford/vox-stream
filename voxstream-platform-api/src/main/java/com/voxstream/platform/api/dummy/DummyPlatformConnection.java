@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import com.voxstream.platform.api.PlatformConnection;
 import com.voxstream.platform.api.PlatformStatus;
 import com.voxstream.platform.api.PlatformStatus.State;
+import com.voxstream.platform.api.events.PlatformEvent;
 
 /**
  * In-memory dummy implementation used for early Phase 3 wiring & testing.
@@ -27,6 +28,7 @@ public class DummyPlatformConnection implements PlatformConnection {
 
     private final AtomicReference<PlatformStatus> status = new AtomicReference<>(PlatformStatus.disconnected());
     private final List<Consumer<PlatformStatus>> listeners = new CopyOnWriteArrayList<>();
+    private final List<Consumer<PlatformEvent>> eventListeners = new CopyOnWriteArrayList<>();
     private volatile String sessionId;
 
     // Failure injection: A sequence describing outcomes for connect attempts.
@@ -37,8 +39,7 @@ public class DummyPlatformConnection implements PlatformConnection {
     private volatile List<Object> scriptedOutcomes = List.of();
     private volatile int outcomeIndex = 0;
     private volatile long simulatedLatencyMs = 250;
-    @SuppressWarnings("unused")
-    private volatile boolean emitSyntheticEvents = false; // placeholder for future event emission toggle
+    private volatile boolean emitSyntheticEvents = false; // now used
     private volatile Clock clock = Clock.systemUTC();
     private volatile long syntheticEventCounter = 0;
 
@@ -66,9 +67,13 @@ public class DummyPlatformConnection implements PlatformConnection {
         if (!emitSyntheticEvents || status.get().state() != State.CONNECTED)
             return;
         long n = ++syntheticEventCounter;
-        log.debug("[DummyPlatform] Synthetic event #{} at {}", n, clock.instant());
-        // Future: publish via callback into manager/event bus through listener
-        // mechanism
+        PlatformEvent evt = new SimplePlatformEvent(clock.instant(), PLATFORM_ID, "synthetic", n);
+        log.debug("[DummyPlatform] Synthetic event #{} at {}", n, evt.timestamp());
+        firePlatformEvent(evt);
+    }
+
+    public long syntheticEventCount() {
+        return syntheticEventCounter;
     }
 
     @Override
@@ -91,6 +96,9 @@ public class DummyPlatformConnection implements PlatformConnection {
                 PlatformStatus connected = PlatformStatus.connected(Instant.now().toEpochMilli());
                 updateStatus(connected);
                 log.info("[DummyPlatform] Connected session {}", sessionId);
+                if (emitSyntheticEvents) {
+                    tickSyntheticEvent(); // emit one immediately for visibility
+                }
                 return true;
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -135,6 +143,11 @@ public class DummyPlatformConnection implements PlatformConnection {
         listeners.add(listener);
     }
 
+    @Override
+    public void addPlatformEventListener(Consumer<PlatformEvent> listener) {
+        eventListeners.add(listener);
+    }
+
     private void updateStatus(PlatformStatus newStatus) {
         status.set(newStatus);
         listeners.forEach(l -> {
@@ -146,11 +159,25 @@ public class DummyPlatformConnection implements PlatformConnection {
         });
     }
 
+    private void firePlatformEvent(PlatformEvent evt) {
+        eventListeners.forEach(l -> {
+            try {
+                l.accept(evt);
+            } catch (Exception e) {
+                log.warn("Event listener error: {}", e.getMessage());
+            }
+        });
+    }
+
     @Override
     public String platformId() {
         return PLATFORM_ID;
     }
 
     private record Outcome(boolean success, boolean fatal) {
+    }
+
+    private record SimplePlatformEvent(Instant timestamp, String platform, String type, long sequence)
+            implements PlatformEvent {
     }
 }

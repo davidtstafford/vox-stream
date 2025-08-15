@@ -15,6 +15,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.voxstream.core.bus.EventBusImpl;
 import com.voxstream.core.config.ConfigurationService;
 import com.voxstream.core.config.VoxStreamConfiguration;
 import com.voxstream.core.config.keys.CoreConfigKeys;
@@ -59,6 +60,7 @@ public class PlatformConnectionManagerLogSummaryTest {
                 () -> new JdbcConfigDao(ctx.getBean(JdbcTemplate.class), ctx.getBean(EncryptionService.class)));
         ctx.registerBean(ConfigurationService.class);
         ctx.registerBean(EventPersistenceService.class);
+        ctx.registerBean(EventBusImpl.class); // added event bus bean
         ctx.registerBean(DummyPlatformConnectionFactory.class);
         ctx.registerBean(PlatformConnectionRegistry.class);
         ctx.registerBean(PlatformConnectionManager.class);
@@ -87,10 +89,16 @@ public class PlatformConnectionManagerLogSummaryTest {
                 .get(DummyPlatformConnection.PLATFORM_ID).orElseThrow();
         dummy.setSimulatedLatencyMs(5);
         dummy.setScriptedOutcomes(List.of(true));
+        dummy.setEmitSyntheticEvents(true);
 
         PlatformConnectionManager mgr = ctx.getBean(PlatformConnectionManager.class);
         mgr.addTestSummaryHook(rows -> captured.add(List.copyOf(rows)));
         mgr.start();
+
+        // tick synthetic events a few times
+        for (int i = 0; i < 5; i++) {
+            dummy.tickSyntheticEvent();
+        }
 
         long deadline = System.currentTimeMillis() + 1000;
         while (System.currentTimeMillis() < deadline && captured.size() < 2) {
@@ -100,5 +108,7 @@ public class PlatformConnectionManagerLogSummaryTest {
         boolean hasDummy = captured.stream()
                 .anyMatch(list -> list.stream().anyMatch(r -> r.platformId().equals("dummy")));
         assertTrue(hasDummy, "At least one summary row for dummy platform expected");
+        // Assert synthetic events were emitted
+        assertTrue(dummy.syntheticEventCount() >= 1, "Expected synthetic events to be emitted");
     }
 }

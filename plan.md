@@ -156,7 +156,6 @@ VoxStream is a Java-based application with a Java frontend and backend that inte
   - [x] Add config keys: platform.enabled, reconnect.initialDelayMs, reconnect.maxDelayMs, reconnect.maxAttempts (-1=infinite), heartbeat.intervalSec, reconnect.jitterPercent, reconnect.resetAfterStableMs
   - [x] Implement validators for new keys (ranges, relationships: initial < max, positive intervals, jitter 0.0-0.5, resetAfterStable 10s-1h)
   - [x] Profile support: include new keys in export/import & checksum
-  - NOTE: Status event propagation test pending (will subscribe to EventBus SYSTEM events and assert ordered lifecycle transitions).
 - [x] Implement connection management system
   - [x] PlatformConnectionManager orchestrating factories, active connections, lifecycle (initial implementation)
   - [x] Track per-connection state machine (DISCONNECTED, CONNECTING, CONNECTED, FAILED, RECONNECT_SCHEDULED)
@@ -171,11 +170,11 @@ VoxStream is a Java-based application with a Java frontend and backend that inte
   - [x] Metrics: connects, disconnects, failedAttempts, currentBackoffMs
   - [x] Snapshot API exposed via manager
   - [x] Periodic log summary (config flag platform.status.logSummary.enabled / interval) (covered by PlatformConnectionManagerLogSummaryTest)
-- [ ] Enhance DummyPlatformConnection for testing
+- [x] Enhance DummyPlatformConnection for testing
   - [x] Simulate connect latency & failure injection script (incl. fatal markers)
-  - [x] Toggle to emit synthetic platform events (internal hook & counter; future bus publish) + controllable clock setter
-  - [ ] Expose controllable clock or hooks for tests (basic setter exists; need event emission path & tests)
-  - [ ] Publish synthetic events to EventBus when enabled (pending)
+  - [x] Toggle to emit synthetic platform events (internal hook & counter; controllable clock setter)
+  - [x] Expose controllable clock or hooks for tests (setter + synthetic emit + manager publication mapping to UNKNOWN)
+  - [x] Publish synthetic events to EventBus when enabled (via PlatformConnectionManager listener -> UNKNOWN EventType)
 - [x] Tests
   - [x] Manager lifecycle (start, connect all enabled, shutdown)
   - [x] Auto-reconnect success after transient failures
@@ -184,7 +183,7 @@ VoxStream is a Java-based application with a Java frontend and backend that inte
   - [x] Fatal failure stops reconnection attempts (PlatformConnectionManagerBackoffTest)
   - [x] Status event propagation to EventBus subscribers (PlatformConnectionManagerStatusEventTest)
   - [x] Validation of new config keys (boundary, composite)
-    - NOTE: StatusEventPropagationTest implemented as PlatformConnectionManagerStatusEventTest.
+  - [x] Synthetic event publication test (PlatformConnectionManagerSyntheticEventTest)
 
 ### 3.2 Twitch Integration (MVP)
 - [ ] Setup Twitch API client

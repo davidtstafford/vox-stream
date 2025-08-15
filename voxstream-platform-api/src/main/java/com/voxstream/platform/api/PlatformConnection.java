@@ -3,6 +3,8 @@ package com.voxstream.platform.api;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
+import com.voxstream.platform.api.events.PlatformEvent;
+
 /**
  * Represents a connection to a streaming platform (e.g., Twitch).
  * Lifecycle is asynchronous to avoid blocking UI or event threads.
@@ -48,6 +50,13 @@ public interface PlatformConnection {
      */
     default void addStatusListener(Consumer<PlatformStatus> listener) {
         // optional; implementations supporting listeners override
+    }
+
+    /**
+     * Register a listener for raw platform events (pre-mapping). Optional.
+     */
+    default void addPlatformEventListener(Consumer<PlatformEvent> listener) {
+        // optional; implementations supporting events override
     }
 
     /**
