@@ -3,7 +3,7 @@ package com.voxstream.core.platform;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.h2.jdbcx.JdbcDataSource;
@@ -20,7 +20,8 @@ import com.voxstream.platform.api.PlatformStatus.State;
 
 /**
  * Integration-style test verifying Spring discovery + dummy connection
- * lifecycle.
+ * lifecycle. Now also validates SPI fallback inclusion of second dummy
+ * platform.
  */
 public class PlatformConnectionRegistryTest {
 
@@ -28,6 +29,7 @@ public class PlatformConnectionRegistryTest {
     @ComponentScan(basePackages = {
             "com.voxstream.core.platform",
             "com.voxstream.platform.api.dummy",
+            // dummy2 may be loaded via SPI even without component scanning
             "com.voxstream.core.config",
             "com.voxstream.core.security",
             "com.voxstream.core.dao.jdbc",
@@ -62,9 +64,10 @@ public class PlatformConnectionRegistryTest {
     void registryDiscoversDummyAndConnects() throws Exception {
         try (AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(TestConfig.class)) {
             PlatformConnectionRegistry registry = ctx.getBean(PlatformConnectionRegistry.class);
-            // ensure factory present
-            assertTrue(registry.platformIds().contains("dummy"));
-            assertEquals(List.of("dummy"), registry.platformIds().stream().sorted().toList());
+            // ensure factories present (dummy via Spring, dummy2 via SPI fallback)
+            Set<String> ids = Set.copyOf(registry.platformIds());
+            assertTrue(ids.contains("dummy"));
+            assertTrue(ids.contains("dummy2"));
 
             PlatformConnection conn = registry.get("dummy").orElseThrow();
             assertEquals(State.DISCONNECTED, conn.status().state());

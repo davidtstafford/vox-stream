@@ -1,3 +1,4 @@
+/Users/davidstafford/git/vox-stream/voxstream-core/src/test/java/com/voxstream/core/platform/PlatformConnectionRegistryMetadataTest.java
 /Users/davidstafford/git/vox-stream/voxstream-core/src/test/java/com/voxstream/core/platform/PlatformConnectionManagerTest.java
 /Users/davidstafford/git/vox-stream/voxstream-core/src/test/java/com/voxstream/core/config/ConfigValidatorsTest.java
 /Users/davidstafford/git/vox-stream/voxstream-core/src/test/java/com/voxstream/core/config/profile/ProfileServiceTest.java
@@ -18,3 +19,4 @@
 /Users/davidstafford/git/vox-stream/voxstream-core/src/test/java/com/voxstream/core/dao/JdbcTwitchOAuthTokenDaoTest.java
 /Users/davidstafford/git/vox-stream/voxstream-core/src/test/java/com/voxstream/core/dao/JdbcConfigDaoTest.java
 /Users/davidstafford/git/vox-stream/voxstream-core/src/test/java/com/voxstream/core/bus/EventBusCleanupTest.java
+/Users/davidstafford/git/vox-stream/voxstream-core/src/test/java/com/voxstream/core/platform/PlatformConnectionRegistrySpiDiscoveryTest.java

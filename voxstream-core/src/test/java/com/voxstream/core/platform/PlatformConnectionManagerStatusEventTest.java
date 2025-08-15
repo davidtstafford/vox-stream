@@ -74,6 +74,7 @@ public class PlatformConnectionManagerStatusEventTest {
         try (AnnotationConfigApplicationContext c = ctx()) {
             ConfigurationService cfg = c.getBean(ConfigurationService.class);
             cfg.set(CoreConfigKeys.PLATFORM_ENABLED, true);
+            cfg.setDynamicBoolean("platform.dummy.enabled", true);
             cfg.set(CoreConfigKeys.PLATFORM_RECONNECT_INITIAL_DELAY_MS, 100);
             cfg.set(CoreConfigKeys.PLATFORM_RECONNECT_MAX_DELAY_MS, 800);
             cfg.set(CoreConfigKeys.PLATFORM_RECONNECT_MAX_ATTEMPTS, 5);

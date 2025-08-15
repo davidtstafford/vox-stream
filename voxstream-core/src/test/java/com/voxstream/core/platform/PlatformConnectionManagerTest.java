@@ -66,6 +66,8 @@ public class PlatformConnectionManagerTest {
         try (AnnotationConfigApplicationContext ctx = baseCtx()) {
             ConfigurationService cfg = ctx.getBean(ConfigurationService.class);
             cfg.set(CoreConfigKeys.PLATFORM_ENABLED, true);
+            // Enable dummy platform via dynamic key (new per-platform gating)
+            cfg.setDynamicBoolean("platform.dummy.enabled", true);
             cfg.set(CoreConfigKeys.PLATFORM_RECONNECT_INITIAL_DELAY_MS, 100);
             cfg.set(CoreConfigKeys.PLATFORM_RECONNECT_MAX_DELAY_MS, 800);
             cfg.set(CoreConfigKeys.PLATFORM_RECONNECT_MAX_ATTEMPTS, 5);

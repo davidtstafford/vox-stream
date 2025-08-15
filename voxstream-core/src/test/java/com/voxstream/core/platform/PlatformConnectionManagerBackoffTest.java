@@ -66,6 +66,7 @@ public class PlatformConnectionManagerBackoffTest {
         try (AnnotationConfigApplicationContext c = ctx()) {
             ConfigurationService cfg = c.getBean(ConfigurationService.class);
             cfg.set(CoreConfigKeys.PLATFORM_ENABLED, true);
+            cfg.setDynamicBoolean("platform.dummy.enabled", true);
             cfg.set(CoreConfigKeys.PLATFORM_RECONNECT_INITIAL_DELAY_MS, 100);
             cfg.set(CoreConfigKeys.PLATFORM_RECONNECT_MAX_DELAY_MS, 2000);
             cfg.set(CoreConfigKeys.PLATFORM_RECONNECT_MAX_ATTEMPTS, -1);
@@ -107,6 +108,7 @@ public class PlatformConnectionManagerBackoffTest {
         try (AnnotationConfigApplicationContext c = ctx()) {
             ConfigurationService cfg = c.getBean(ConfigurationService.class);
             cfg.set(CoreConfigKeys.PLATFORM_ENABLED, true);
+            cfg.setDynamicBoolean("platform.dummy.enabled", true);
             cfg.set(CoreConfigKeys.PLATFORM_RECONNECT_INITIAL_DELAY_MS, 100);
             cfg.set(CoreConfigKeys.PLATFORM_RECONNECT_MAX_DELAY_MS, 2000);
             cfg.set(CoreConfigKeys.PLATFORM_RECONNECT_MAX_ATTEMPTS, 2); // limit attempts
@@ -141,6 +143,7 @@ public class PlatformConnectionManagerBackoffTest {
         try (AnnotationConfigApplicationContext c = ctx()) {
             ConfigurationService cfg = c.getBean(ConfigurationService.class);
             cfg.set(CoreConfigKeys.PLATFORM_ENABLED, true);
+            cfg.setDynamicBoolean("platform.dummy.enabled", true);
             cfg.set(CoreConfigKeys.PLATFORM_RECONNECT_INITIAL_DELAY_MS, 100);
             cfg.set(CoreConfigKeys.PLATFORM_RECONNECT_MAX_DELAY_MS, 2000);
             cfg.set(CoreConfigKeys.PLATFORM_RECONNECT_MAX_ATTEMPTS, -1);

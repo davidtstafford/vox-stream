@@ -191,4 +191,28 @@ public class ConfigurationService {
                 log.debug("No migration actions for target version {}", to);
         }
     }
+
+    public boolean getDynamicBoolean(String key, boolean defaultVal) {
+        // Direct DAO lookup bypassing validators / schema; cached after first read
+        Object cached = cache.get(key);
+        if (cached instanceof Boolean b) {
+            return b;
+        }
+        Optional<String> stored = dao.get(key);
+        boolean val = stored.map(String::trim).filter(s -> !s.isEmpty()).map(Boolean::parseBoolean).orElse(defaultVal);
+        cache.put(key, val);
+        return val;
+    }
+
+    /**
+     * Store a dynamic boolean key (e.g. platform.<id>.enabled) that is not part of
+     * the static {@link CoreConfigKeys} registry. Bypasses validation layer.
+     */
+    public void setDynamicBoolean(String key, boolean value) {
+        if (key == null || key.isBlank()) {
+            throw new IllegalArgumentException("Dynamic key cannot be null/blank");
+        }
+        dao.put(key, Boolean.toString(value));
+        cache.put(key, value);
+    }
 }

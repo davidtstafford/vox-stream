@@ -1,10 +1,10 @@
-com/voxstream/platform/api/dummy/DummyPlatformConnection$SimplePlatformEvent.class
 com/voxstream/platform/api/dummy/DummyPlatformConnection.class
-com/voxstream/platform/api/PlatformConnection.class
 com/voxstream/platform/api/dummy/DummyPlatformConnection$Outcome.class
+com/voxstream/platform/api/PlatformConnectionFactory.class
+com/voxstream/platform/api/PlatformStatus.class
+com/voxstream/platform/api/dummy/DummyPlatformConnection$SimplePlatformEvent.class
+com/voxstream/platform/api/PlatformConnection.class
 com/voxstream/platform/api/dummy/DummyPlatformConnectionFactory.class
 com/voxstream/platform/api/events/PlatformEvent.class
 com/voxstream/platform/api/credentials/PlatformCredential.class
-com/voxstream/platform/api/PlatformConnectionFactory.class
-com/voxstream/platform/api/PlatformStatus.class
 com/voxstream/platform/api/PlatformStatus$State.class

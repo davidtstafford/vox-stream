@@ -241,12 +241,24 @@ Phase 3.2 status: COMPLETE (All core Twitch integration goals met; chat & viewer
 - [x] Tests: UI controller unit tests (sign-out & system log append basic coverage)
 
 ### 3.4 Platform Abstraction for Future Expansion
-- [ ] Design interface for additional platforms (document required methods & event categories)
-- [ ] Create plugin architecture for new platforms
-  - [ ] SPI: spring-autodiscovery via PlatformConnectionFactory beans in separate module
-  - [ ] Version/compat metadata in factory
-- [ ] Document platform integration guide (steps, required mappings, credential handling)
-- [ ] Example second dummy plugin skeleton (for docs validation)
+- [x] Draft extension goals (multi-platform, plugin loading)
+- [x] Survey existing registry (PlatformConnectionRegistry) for extension points
+- [x] Add PlatformMetadata interface (id, displayName, version, capabilities)
+- [x] Extend PlatformConnectionFactory to optionally expose metadata & configuration descriptors
+- [x] Define Capability enum (EVENTS, CHAT, TTS_INPUT, RESPONSES, WEBHOOK, IRC_CHAT)
+- [x] Introduce SPI loading plan (Spring + optional ServiceLoader fallback)
+- [x] Create documentation draft (platform integration guide outline) (see docs/PLATFORM_INTEGRATION.md)
+- [x] Implement example DummySecondPlatform module (skeleton connection always CONNECTED)
+- [x] UI: dynamic population of connections table from registry.platformIds()
+- [x] UI: add platform column tooltips using metadata capabilities
+- [x] Persist per-platform enable flag (platform.<id>.enabled) generated dynamically (manager respects dynamic boolean keys)
+- [x] Validation: generic platform enabled key handling (implicit via dynamic lookup w/ default=false)
+- [x] Tests: registry discovery of second dummy platform
+- [x] Tests: metadata surface (capabilities enumeration)
+- [x] Tests: UI controller populates rows for all discovered platforms (headless)
+
+Progress notes (Phase 3.4):
+Implemented metadata & capability surfacing end-to-end (backend registry + UI tooltips). Added dynamic per-platform enable flag support (platform.<id>.enabled) via ConfigurationService.getDynamicBoolean and PlatformConnectionManager gating. Added second dummy platform (dummy2) and discovery tests. Implemented SPI fallback: registry now loads factories via Java ServiceLoader when not already provided by Spring (Spring beans take precedence). Draft platform integration guide created (docs/PLATFORM_INTEGRATION.md) outlining connector implementation, SPI vs Spring loading, capabilities, configuration strategy, and testing checklist.
 
 **Testing Phase 3:**
 - [ ] Test Twitch connection with real account

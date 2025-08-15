@@ -74,8 +74,27 @@ public class PlatformConnectionManager {
             return;
         }
         log.info("PlatformConnectionManager starting (platforms={})", registry.platformIds());
-        registry.platformIds().forEach(this::initAndConnectAsync);
+        registry.platformIds().forEach(id -> {
+            if (isPlatformEnabled(id)) {
+                initAndConnectAsync(id);
+            } else {
+                log.info("Platform '{}' disabled via config flag (skipping)", id);
+            }
+        });
         startLogSummaryIfEnabled();
+    }
+
+    private boolean isPlatformEnabled(String id) {
+        // Prefer explicit platform-specific key if present in CoreConfigKeys (e.g.
+        // twitch)
+        if ("twitch".equals(id)) {
+            try {
+                return config.get(CoreConfigKeys.TWITCH_ENABLED);
+            } catch (Exception ignored) {
+            }
+        }
+        // Fallback to dynamic key: platform.<id>.enabled (default=false)
+        return config.getDynamicBoolean("platform." + id + ".enabled", false);
     }
 
     public void shutdown() {

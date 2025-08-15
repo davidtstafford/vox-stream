@@ -1,7 +1,11 @@
 /Users/davidstafford/git/vox-stream/voxstream-platform-api/src/main/java/com/voxstream/platform/api/PlatformStatus.java
 /Users/davidstafford/git/vox-stream/voxstream-platform-api/src/main/java/com/voxstream/platform/api/events/PlatformEvent.java
+/Users/davidstafford/git/vox-stream/voxstream-platform-api/src/main/java/com/voxstream/platform/api/dummy2/DummySecondPlatformConnection.java
+/Users/davidstafford/git/vox-stream/voxstream-platform-api/src/main/java/com/voxstream/platform/api/Capability.java
 /Users/davidstafford/git/vox-stream/voxstream-platform-api/src/main/java/com/voxstream/platform/api/credentials/PlatformCredential.java
 /Users/davidstafford/git/vox-stream/voxstream-platform-api/src/main/java/com/voxstream/platform/api/dummy/DummyPlatformConnectionFactory.java
+/Users/davidstafford/git/vox-stream/voxstream-platform-api/src/main/java/com/voxstream/platform/api/PlatformMetadata.java
 /Users/davidstafford/git/vox-stream/voxstream-platform-api/src/main/java/com/voxstream/platform/api/PlatformConnection.java
+/Users/davidstafford/git/vox-stream/voxstream-platform-api/src/main/java/com/voxstream/platform/api/dummy2/DummySecondPlatformConnectionFactory.java
 /Users/davidstafford/git/vox-stream/voxstream-platform-api/src/main/java/com/voxstream/platform/api/PlatformConnectionFactory.java
 /Users/davidstafford/git/vox-stream/voxstream-platform-api/src/main/java/com/voxstream/platform/api/dummy/DummyPlatformConnection.java

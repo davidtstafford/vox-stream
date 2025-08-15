@@ -25,6 +25,7 @@ import com.voxstream.core.config.profile.ProfileService;
 import com.voxstream.core.event.Event;
 import com.voxstream.core.event.EventType;
 import com.voxstream.core.platform.PlatformConnectionManager;
+import com.voxstream.core.platform.PlatformConnectionRegistry;
 import com.voxstream.core.twitch.oauth.TwitchOAuthService;
 import com.voxstream.platform.api.PlatformStatus;
 
@@ -159,6 +160,8 @@ public class MainController implements Initializable {
     private EventBus eventBus;
     @Autowired
     private TwitchOAuthService twitchOAuthService;
+    @Autowired
+    private PlatformConnectionRegistry platformConnectionRegistry;
 
     private String currentExportHashCached = "";
     private final ObservableList<ConnectionRow> connectionRows = FXCollections.observableArrayList();
@@ -366,13 +369,25 @@ public class MainController implements Initializable {
 
     private void refreshConnections() {
         connectionRows.clear();
-        var st = platformConnectionManager.status("twitch");
-        var metrics = platformConnectionManager.metrics("twitch");
-        String user = configurationService.get(CoreConfigKeys.TWITCH_CLIENT_ID) != null
-                ? configurationService.get(CoreConfigKeys.TWITCH_CLIENT_ID)
-                : "";
-        connectionRows.add(new ConnectionRow("twitch", user, st, metrics));
-        // Apply simple status coloring via row factory
+        // dynamically populate using registry
+        if (platformConnectionRegistry != null) {
+            for (String id : platformConnectionRegistry.platformIds()) {
+                var st = platformConnectionManager.status(id);
+                var metrics = platformConnectionManager.metrics(id);
+                String user = id.equals("twitch") && configurationService.get(CoreConfigKeys.TWITCH_CLIENT_ID) != null
+                        ? configurationService.get(CoreConfigKeys.TWITCH_CLIENT_ID)
+                        : "";
+                connectionRows.add(new ConnectionRow(id, user, st, metrics));
+            }
+        } else { // fallback to existing twitch-only logic
+            var st = platformConnectionManager.status("twitch");
+            var metrics = platformConnectionManager.metrics("twitch");
+            String user = configurationService.get(CoreConfigKeys.TWITCH_CLIENT_ID) != null
+                    ? configurationService.get(CoreConfigKeys.TWITCH_CLIENT_ID)
+                    : "";
+            connectionRows.add(new ConnectionRow("twitch", user, st, metrics));
+        }
+        // Apply simple status coloring via row factory (unchanged logic)
         if (connectionsTable != null && connectionsTable.getRowFactory() == null) {
             connectionsTable.setRowFactory(tv -> new javafx.scene.control.TableRow<>() {
                 @Override
@@ -385,14 +400,22 @@ public class MainController implements Initializable {
                         String state = item.getStatus();
                         String color;
                         switch (state) {
-                            case "CONNECTED" -> color = "#c8f7c5"; // light green
-                            case "CONNECTING" -> color = "#fff4c2"; // light yellow
-                            case "FAILED" -> color = "#f7c5c5"; // light red
-                            case "RECONNECT_SCHEDULED" -> color = "#e0d7ff"; // light purple
+                            case "CONNECTED" -> color = "#c8f7c5";
+                            case "CONNECTING" -> color = "#fff4c2";
+                            case "FAILED" -> color = "#f7c5c5";
+                            case "RECONNECT_SCHEDULED" -> color = "#e0d7ff";
                             default -> color = "white";
                         }
                         setStyle("-fx-background-color: " + color + ";");
-                        setTooltip(new Tooltip(item.statusDetail));
+                        // Build tooltip text without mutating a captured local variable in a lambda
+                        String baseTip = item.statusDetail;
+                        String capsTip = "";
+                        if (platformConnectionRegistry != null) {
+                            capsTip = platformConnectionRegistry.metadata(item.getPlatform())
+                                    .map(md -> "\nCapabilities: " + md.capabilities())
+                                    .orElse("");
+                        }
+                        setTooltip(new Tooltip(baseTip + capsTip));
                     }
                 }
             });

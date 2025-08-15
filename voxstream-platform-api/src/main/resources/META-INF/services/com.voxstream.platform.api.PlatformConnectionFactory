@@ -1,0 +1,2 @@
+com.voxstream.platform.api.dummy.DummyPlatformConnectionFactory
+com.voxstream.platform.api.dummy2.DummySecondPlatformConnectionFactory
