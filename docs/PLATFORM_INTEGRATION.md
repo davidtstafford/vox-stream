@@ -139,5 +139,56 @@ Demonstrates:
 - SPI + metadata (EVENTS only).
 - Always CONNECTED behavior used in tests & UI enumeration.
 
+## 18. Twitch OAuth & PKCE Authentication Reference
+This section documents the Twitch-specific OAuth implementation so platform/plugin authors understand how authentication is currently handled and where future multi-platform credential abstractions will align.
+
+### 18.1 Key Configuration Properties
+- `twitch.clientId` (String) – REQUIRED. Pre-seeded with the default development client id in code; replace with your own in production.
+- `twitch.clientSecret` (String) – OPTIONAL when `twitch.oauth.pkce.enabled=true` (default). Required only if you disable PKCE.
+- `twitch.oauth.pkce.enabled` (Boolean, default `true`) – Enables Authorization Code + PKCE (S256) flow. When true, no client secret is sent or stored; the UI labels the secret field as optional and will not persist an empty value.
+- `twitch.redirectPort` (Integer, default `51515`) – Local loopback HTTP server port used to capture the authorization code. The effective redirect URI is: `http://localhost:<port>/callback` (register this exact URL in your Twitch application).
+- `twitch.scopes` (Comma-separated) – Stored as comma list; converted to space-delimited during auth request (Twitch requires space separated scopes).
+- `twitch.enabled` (Boolean) – Legacy enable flag for Twitch (still honored); also governed by global `platform.enabled`.
+
+### 18.2 Authorization Flow (PKCE Enabled)
+1. User clicks Connect (or token missing on startup); service generates:
+   - `state` (UUID)
+   - `code_verifier` (64 random bytes base64url, no padding)
+   - `code_challenge = BASE64URL(SHA256(code_verifier))`
+2. Browser opened to `https://id.twitch.tv/oauth2/authorize` with parameters:
+   - `response_type=code`
+   - `client_id`
+   - `redirect_uri=http://localhost:<port>/callback`
+   - `scope` (space encoded as `%20`)
+   - `state`
+   - `code_challenge`, `code_challenge_method=S256`
+3. Loopback server receives `code`; service exchanges it (POST `/oauth2/token`) with body including `code_verifier` (no client secret when PKCE enabled).
+4. Access + refresh token stored (encrypted DAO) along with expiry and scopes; user id/login populated by validation + Helix `/users` enrichment.
+5. Periodic validator task:
+   - Calls `/oauth2/validate` to refresh expiry and confirm validity.
+   - Refreshes the token proactively if <10m remaining.
+6. Refresh flow (`grant_type=refresh_token`) omits `client_secret` when PKCE enabled.
+
+### 18.3 Disabling PKCE (Not Recommended)
+Set `twitch.oauth.pkce.enabled=false` to revert to classic Authorization Code flow which requires:
+- `twitch.clientSecret` to be configured and non-blank.
+The UI will resume requiring the secret and validation will enforce presence when Twitch is enabled. Only disable PKCE if a future Twitch requirement or unsupported edge case appears.
+
+### 18.4 Testing & Automation Hooks
+- System property `twitch.oauth.disableInteractive=true` suppresses browser launch / loopback flow (used in tests).
+- Tokens near expiry (<5 min) trigger an asynchronous refresh.
+- 401 responses on validation or refresh cause token deletion and automatic re-login prompt.
+
+### 18.5 Security Notes
+- PKCE removes the need to ship or persist a client secret, reducing credential leakage risk.
+- Refresh tokens are persisted encrypted; revocation + deletion is performed when the user signs out.
+- When PKCE enabled and the secret field is left blank, nothing is stored for `twitch.clientSecret`.
+
+### 18.6 Planned Abstractions
+Later phases will generalize:
+- Per-platform credential descriptor publication.
+- Unified OAuth/credential UI panels driven by metadata.
+- Secure secret storage pluggability.
+
 ---
 (End of Draft – to be iterated as dynamic config schema + event mapping mature.)

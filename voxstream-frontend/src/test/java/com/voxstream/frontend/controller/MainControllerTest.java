@@ -87,6 +87,18 @@ class MainControllerTest {
         inject(controller, "configuration", cfg);
         inject(controller, "platformConnectionRegistry", registry);
 
+        // default config expectations
+        when(configurationService.get(com.voxstream.core.config.keys.CoreConfigKeys.TWITCH_OAUTH_PKCE_ENABLED))
+                .thenReturn(Boolean.TRUE);
+        when(configurationService.get(com.voxstream.core.config.keys.CoreConfigKeys.TWITCH_CLIENT_ID))
+                .thenReturn("");
+        when(configurationService.get(com.voxstream.core.config.keys.CoreConfigKeys.TWITCH_CLIENT_SECRET))
+                .thenReturn("");
+        when(configurationService.get(com.voxstream.core.config.keys.CoreConfigKeys.TWITCH_SCOPES))
+                .thenReturn("");
+        when(configurationService.get(com.voxstream.core.config.keys.CoreConfigKeys.TWITCH_REDIRECT_PORT))
+                .thenReturn(51515);
+
         // minimal required FXML fields
         inject(controller, "twitchClientSecretField", new TextField());
         inject(controller, "twitchConfigStatusLabel", new Label());

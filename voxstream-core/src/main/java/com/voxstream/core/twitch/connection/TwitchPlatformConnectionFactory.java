@@ -4,6 +4,8 @@ import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
+import com.voxstream.core.config.ConfigurationService;
+import com.voxstream.core.twitch.oauth.TwitchOAuthService;
 import com.voxstream.platform.api.Capability;
 import com.voxstream.platform.api.PlatformConnection;
 import com.voxstream.platform.api.PlatformConnectionFactory;
@@ -11,14 +13,19 @@ import com.voxstream.platform.api.PlatformMetadata;
 
 /**
  * Spring factory exposing TwitchPlatformConnection to the registry.
+ * The underlying connection is now a lazily constructed singleton inside this
+ * factory.
  */
 @Component
 public class TwitchPlatformConnectionFactory implements PlatformConnectionFactory {
 
-    private final TwitchPlatformConnection connection;
+    private final ConfigurationService config;
+    private final TwitchOAuthService oauthService;
+    private volatile TwitchPlatformConnection singleton; // lazy init
 
-    public TwitchPlatformConnectionFactory(TwitchPlatformConnection connection) {
-        this.connection = connection;
+    public TwitchPlatformConnectionFactory(ConfigurationService config, TwitchOAuthService oauthService) {
+        this.config = config;
+        this.oauthService = oauthService;
     }
 
     @Override
@@ -28,14 +35,24 @@ public class TwitchPlatformConnectionFactory implements PlatformConnectionFactor
 
     @Override
     public PlatformConnection create() {
-        return connection;
+        TwitchPlatformConnection inst = singleton;
+        if (inst == null) {
+            synchronized (this) {
+                inst = singleton;
+                if (inst == null) {
+                    inst = new TwitchPlatformConnection(config, oauthService);
+                    singleton = inst;
+                }
+            }
+        }
+        return inst;
     }
 
     @Override
     public PlatformMetadata metadata() {
         return new PlatformMetadata(platformId(), "Twitch",
-                connection.getClass().getPackage().getImplementationVersion() == null ? "1.0.0"
-                        : connection.getClass().getPackage().getImplementationVersion(),
+                TwitchPlatformConnection.class.getPackage().getImplementationVersion() == null ? "1.0.0"
+                        : TwitchPlatformConnection.class.getPackage().getImplementationVersion(),
                 Set.of(Capability.EVENTS));
     }
 }

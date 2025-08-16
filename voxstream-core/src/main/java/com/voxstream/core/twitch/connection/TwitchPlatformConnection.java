@@ -9,7 +9,6 @@ import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import com.voxstream.core.config.ConfigurationService;
 import com.voxstream.core.config.keys.CoreConfigKeys;
@@ -24,8 +23,10 @@ import com.voxstream.platform.api.events.PlatformEvent;
 
 /**
  * Twitch platform connection integrating OAuth + EventSub websocket (MVP).
+ * This is no longer a Spring component; it is constructed lazily by
+ * {@link TwitchPlatformConnectionFactory} so that the platform connection
+ * lifecycle is fully owned by the registry/manager layer.
  */
-@Component
 public class TwitchPlatformConnection implements PlatformConnection {
     private static final Logger log = LoggerFactory.getLogger(TwitchPlatformConnection.class);
 
@@ -39,11 +40,12 @@ public class TwitchPlatformConnection implements PlatformConnection {
     private volatile boolean connecting;
     private volatile EventSubClient eventSubClient;
 
+    // Primary constructor used by factory (creates default websocket client)
     public TwitchPlatformConnection(ConfigurationService config, TwitchOAuthService oauthService) {
         this(config, oauthService, new EventSubWebSocketClient());
     }
 
-    // Additional constructor for test injection
+    // Additional constructor for test injection (allows mock EventSubClient)
     public TwitchPlatformConnection(ConfigurationService config, TwitchOAuthService oauthService,
             EventSubClient eventSubClient) {
         this.config = Objects.requireNonNull(config);
@@ -61,27 +63,41 @@ public class TwitchPlatformConnection implements PlatformConnection {
 
     @Override
     public CompletableFuture<Boolean> connect() {
-        if (!config.get(CoreConfigKeys.TWITCH_ENABLED)) {
+        boolean enabled = config.get(CoreConfigKeys.TWITCH_ENABLED)
+                || config.getDynamicBoolean("platform.twitch.enabled", false);
+        if (!enabled) {
+            log.info("Twitch connect requested but platform disabled (both flags false)");
             updateStatus(PlatformStatus.failed("twitch.disabled", true));
             return CompletableFuture.completedFuture(false);
+        }
+        // Ensure OAuth service started (may have been skipped if user only toggled
+        // dynamic flag after app launch)
+        try {
+            oauthService.start();
+        } catch (Exception e) {
+            log.debug("OAuth service start attempt failed/ignored: {}", e.getMessage());
         }
         if (status.state() == PlatformStatus.State.CONNECTED) {
             return CompletableFuture.completedFuture(true);
         }
         if (connecting) {
+            log.debug("Twitch connect called while already connecting");
             return CompletableFuture.completedFuture(false);
         }
         connecting = true;
         updateStatus(PlatformStatus.connecting());
+        log.info("TwitchPlatformConnection starting interactive connect (PKCE/OAuth if needed)...");
         return CompletableFuture.supplyAsync(() -> {
             try {
                 var tokOpt = oauthService.ensureTokenInteractive();
                 if (tokOpt.isEmpty()) {
+                    log.warn("Twitch OAuth token acquisition required (user interaction) - awaiting browser flow");
                     updateStatus(PlatformStatus.failed("oauth.required"));
                     return false;
                 }
                 TwitchOAuthToken tok = tokOpt.get();
                 if (tok.isExpired()) {
+                    log.warn("Obtained Twitch token is expired -> failing connect");
                     updateStatus(PlatformStatus.failed("oauth.expired"));
                     return false;
                 }
@@ -95,8 +111,8 @@ public class TwitchPlatformConnection implements PlatformConnection {
                     log.warn("Twitch EventSub heartbeat timeout -> disconnect & mark failed");
                     safeCloseClient();
                     updateStatus(PlatformStatus.failed("eventsub.heartbeat.timeout"));
-                    // schedule auto-reconnect attempt (manager may also request reconnect)
-                    if (config.get(CoreConfigKeys.TWITCH_ENABLED)) {
+                    if (config.get(CoreConfigKeys.TWITCH_ENABLED)
+                            || config.getDynamicBoolean("platform.twitch.enabled", false)) {
                         CompletableFuture.runAsync(() -> {
                             try {
                                 Thread.sleep(200);
@@ -130,6 +146,7 @@ public class TwitchPlatformConnection implements PlatformConnection {
                     }
                 });
                 String url = "wss://eventsub.wss.twitch.tv/ws";
+                log.info("Connecting Twitch EventSub websocket -> {} (hb={}s)", url, hbSec);
                 client.connect(url, hbSec).join();
                 updateStatus(PlatformStatus.connected(Instant.now().toEpochMilli()));
                 log.info("TwitchPlatformConnection CONNECTED (EventSub WS established)");

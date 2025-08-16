@@ -41,6 +41,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.CheckMenuItem;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
@@ -56,10 +57,13 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
+import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 
 /**
@@ -112,6 +116,8 @@ public class MainController implements Initializable {
     @FXML
     private TableView<ConnectionRow> connectionsTable;
     @FXML
+    private TableColumn<ConnectionRow, Boolean> enabledCol;
+    @FXML
     private TableColumn<ConnectionRow, String> platformCol;
     @FXML
     private TableColumn<ConnectionRow, String> userCol;
@@ -148,6 +154,19 @@ public class MainController implements Initializable {
     @FXML
     private TableColumn<SystemLogRow, String> logDetailCol;
 
+    @FXML
+    private VBox twitchConfigBox; // new dynamic config container
+    @FXML
+    private Label selectedPlatformHeader;
+    @FXML
+    private Label noConfigPlaceholder;
+    @FXML
+    private TitledPane platformConfigPane;
+    @FXML
+    private ComboBox<String> logFilterCombo;
+    @FXML
+    private CheckBox globalPlatformsEnabledCheckbox;
+
     @Autowired
     private VoxStreamConfiguration configuration;
     @Autowired
@@ -166,8 +185,19 @@ public class MainController implements Initializable {
     private String currentExportHashCached = "";
     private final ObservableList<ConnectionRow> connectionRows = FXCollections.observableArrayList();
     private final ObservableList<SystemLogRow> systemLogRows = FXCollections.observableArrayList();
+    @SuppressWarnings("unused")
     private com.voxstream.core.bus.SubscriptionHandle statusSubHandle;
+    @SuppressWarnings("unused")
     private com.voxstream.core.bus.SubscriptionHandle systemLogSubHandle;
+
+    @FXML
+    private Button connectSelectedButton;
+    @FXML
+    private Button disconnectSelectedButton;
+    @FXML
+    private Button reconnectSelectedButton;
+    @FXML
+    private Button refreshConnectionsButton;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -179,6 +209,7 @@ public class MainController implements Initializable {
         initSettingsControls();
         initConnectionTable();
         initSystemLogTable();
+        initGlobalPlatformsToggle();
         refreshExportHashCache();
         refreshProfiles();
         highlightDefaultProfile();
@@ -287,6 +318,12 @@ public class MainController implements Initializable {
     private void initConnectionTable() {
         if (connectionsTable == null)
             return;
+        connectionsTable.setEditable(true); // allow checkbox edits
+        if (enabledCol != null) {
+            enabledCol.setCellValueFactory(data -> data.getValue().enabledProperty());
+            enabledCol.setCellFactory(col -> new CheckBoxTableCell<>());
+            enabledCol.setEditable(true);
+        }
         platformCol.setCellValueFactory(new PropertyValueFactory<>("platform"));
         userCol.setCellValueFactory(new PropertyValueFactory<>("user"));
         statusCol.setCellValueFactory(new PropertyValueFactory<>("status"));
@@ -310,22 +347,78 @@ public class MainController implements Initializable {
         }
         setupActionsColumn();
         connectionsTable.setItems(connectionRows);
+        connectionsTable.getSelectionModel().selectedItemProperty().addListener((obs, o, n) -> onConnectionSelected(n));
         refreshConnections();
+    }
+
+    private void onConnectionSelected(ConnectionRow row) {
+        boolean hasSelection = row != null;
+        if (connectSelectedButton != null)
+            connectSelectedButton.setDisable(!hasSelection);
+        if (disconnectSelectedButton != null)
+            disconnectSelectedButton.setDisable(!hasSelection);
+        if (reconnectSelectedButton != null)
+            reconnectSelectedButton.setDisable(!hasSelection);
+        if (platformConfigPane != null)
+            platformConfigPane.setExpanded(hasSelection);
+        if (selectedPlatformHeader != null) {
+            String headerText = "No platform selected";
+            if (hasSelection && row != null) {
+                headerText = row.getPlatform() + " Settings";
+            }
+            selectedPlatformHeader.setText(headerText);
+        }
+        if (twitchConfigBox != null) {
+            boolean twitch = hasSelection && row != null && "twitch".equals(row.getPlatform());
+            twitchConfigBox.setVisible(twitch);
+            twitchConfigBox.setManaged(twitch);
+            if (twitch) {
+                try {
+                    twitchOAuthService.start();
+                } catch (Exception ignored) {
+                }
+            }
+        }
+        if (noConfigPlaceholder != null) {
+            boolean show = hasSelection && row != null && !("twitch".equals(row.getPlatform()));
+            noConfigPlaceholder.setVisible(show);
+            noConfigPlaceholder.setManaged(show);
+        }
     }
 
     private void setupActionsColumn() {
         if (actionsCol == null)
             return;
         actionsCol.setCellFactory(col -> new TableCell<>() {
-            private final Button connectBtn = new Button("Connect");
-            private final Button disconnectBtn = new Button("Disconnect");
-            private final Button reconnectBtn = new Button("Reconnect");
-            private final Button healthBtn = new Button("Health");
+            private final Button connectBtn = new Button("▶ Connect");
+            private final Button disconnectBtn = new Button("■ Disconnect");
+            private final Button reconnectBtn = new Button("↻ Reconnect");
+            private final Button healthBtn = new Button("❤ Health");
             private final HBox box = new HBox(4, connectBtn, disconnectBtn, reconnectBtn, healthBtn);
             {
+                connectBtn.setTooltip(new Tooltip("Start connection / OAuth if needed"));
+                disconnectBtn.setTooltip(new Tooltip("Gracefully disconnect"));
+                reconnectBtn.setTooltip(new Tooltip("Force a disconnect then connect"));
+                healthBtn.setTooltip(new Tooltip("Run platform health check"));
                 connectBtn.setOnAction(e -> {
                     ConnectionRow row = getTableView().getItems().get(getIndex());
-                    platformConnectionManager.connection(row.getPlatform()).ifPresent(c -> c.connect());
+                    try {
+                        platformConnectionManager.start();
+                    } catch (Exception ignored) {
+                    }
+                    platformConnectionManager.ensurePlatformInitialized(row.getPlatform());
+                    var opt = platformConnectionManager.connection(row.getPlatform());
+                    if (opt.isEmpty()) {
+                        updateStatus("No connection instance (ensure enabled checkbox is checked)", false);
+                        return;
+                    }
+                    var c = opt.get();
+                    if ("twitch".equals(row.getPlatform())) {
+                        updateStatus("Opening Twitch OAuth (if required)...", true);
+                    } else {
+                        updateStatus("Connecting to " + row.getPlatform() + "...", true);
+                    }
+                    c.connect();
                 });
                 disconnectBtn.setOnAction(e -> {
                     ConnectionRow row = getTableView().getItems().get(getIndex());
@@ -335,6 +428,7 @@ public class MainController implements Initializable {
                     ConnectionRow row = getTableView().getItems().get(getIndex());
                     platformConnectionManager.connection(row.getPlatform()).ifPresent(c -> {
                         c.disconnect();
+                        updateStatus("Reconnecting to " + row.getPlatform() + "...", true);
                         c.connect();
                     });
                 });
@@ -358,9 +452,10 @@ public class MainController implements Initializable {
                 } else {
                     ConnectionRow row = getTableView().getItems().get(getIndex());
                     boolean connected = row.getStatus().equals("CONNECTED");
-                    connectBtn.setDisable(connected);
+                    boolean connecting = row.getStatus().equals("CONNECTING");
+                    connectBtn.setDisable(connected || connecting);
                     disconnectBtn.setDisable(!connected);
-                    reconnectBtn.setDisable(false);
+                    reconnectBtn.setDisable(connecting);
                     setGraphic(box);
                 }
             }
@@ -369,7 +464,6 @@ public class MainController implements Initializable {
 
     private void refreshConnections() {
         connectionRows.clear();
-        // dynamically populate using registry
         if (platformConnectionRegistry != null) {
             for (String id : platformConnectionRegistry.platformIds()) {
                 var st = platformConnectionManager.status(id);
@@ -377,7 +471,8 @@ public class MainController implements Initializable {
                 String user = id.equals("twitch") && configurationService.get(CoreConfigKeys.TWITCH_CLIENT_ID) != null
                         ? configurationService.get(CoreConfigKeys.TWITCH_CLIENT_ID)
                         : "";
-                connectionRows.add(new ConnectionRow(id, user, st, metrics));
+                boolean enabled = configurationService.getDynamicBoolean("platform." + id + ".enabled", false);
+                connectionRows.add(new ConnectionRow(id, user, st, metrics, enabled));
             }
         } else { // fallback to existing twitch-only logic
             var st = platformConnectionManager.status("twitch");
@@ -385,7 +480,8 @@ public class MainController implements Initializable {
             String user = configurationService.get(CoreConfigKeys.TWITCH_CLIENT_ID) != null
                     ? configurationService.get(CoreConfigKeys.TWITCH_CLIENT_ID)
                     : "";
-            connectionRows.add(new ConnectionRow("twitch", user, st, metrics));
+            boolean enabled = configurationService.getDynamicBoolean("platform.twitch.enabled", false);
+            connectionRows.add(new ConnectionRow("twitch", user, st, metrics, enabled));
         }
         // Apply simple status coloring via row factory (unchanged logic)
         if (connectionsTable != null && connectionsTable.getRowFactory() == null) {
@@ -397,17 +493,21 @@ public class MainController implements Initializable {
                         setStyle("");
                         setTooltip(null);
                     } else {
-                        String state = item.getStatus();
-                        String color;
-                        switch (state) {
-                            case "CONNECTED" -> color = "#c8f7c5";
-                            case "CONNECTING" -> color = "#fff4c2";
-                            case "FAILED" -> color = "#f7c5c5";
-                            case "RECONNECT_SCHEDULED" -> color = "#e0d7ff";
-                            default -> color = "white";
+                        if (isSelected()) { // preserve default selection styling for readability
+                            setStyle("");
+                        } else {
+                            String state = item.getStatus();
+                            String color;
+                            switch (state) {
+                                case "CONNECTED" -> color = "#c8f7c5";
+                                case "CONNECTING" -> color = "#fff4c2";
+                                case "FAILED" -> color = "#f7c5c5";
+                                case "RECONNECT_SCHEDULED" -> color = "#e0d7ff";
+                                default -> color = "white";
+                            }
+                            setStyle("-fx-background-color: " + color + ";");
                         }
-                        setStyle("-fx-background-color: " + color + ";");
-                        // Build tooltip text without mutating a captured local variable in a lambda
+                        // Build tooltip text
                         String baseTip = item.statusDetail;
                         String capsTip = "";
                         if (platformConnectionRegistry != null) {
@@ -464,6 +564,23 @@ public class MainController implements Initializable {
                 }
             }
         });
+        if (logFilterCombo != null) {
+            logFilterCombo.getItems().setAll("All", "twitch", "dummy", "dummy2");
+            logFilterCombo.getSelectionModel().selectFirst();
+            logFilterCombo.valueProperty().addListener((o, a, b) -> applyLogFilter());
+        }
+    }
+
+    private void applyLogFilter() {
+        if (logFilterCombo == null || systemLogTable == null)
+            return;
+        String sel = logFilterCombo.getValue();
+        if (sel == null || sel.equals("All")) {
+            systemLogTable.setItems(systemLogRows);
+        } else {
+            var filtered = systemLogRows.filtered(r -> r.getPlatform().equals(sel));
+            systemLogTable.setItems(filtered);
+        }
     }
 
     private void startSystemLogSubscription() {
@@ -480,6 +597,16 @@ public class MainController implements Initializable {
                 systemLogRows.add(0, new SystemLogRow(System.currentTimeMillis(), platform, state, detail));
                 if (systemLogRows.size() > 200)
                     systemLogRows.remove(systemLogRows.size() - 1);
+                // New: drive global status + throbber based on connection lifecycle
+                switch (state) {
+                    case "CONNECTING" -> updateStatus(platform + " connecting...", true);
+                    case "CONNECTED" -> updateStatus(platform + " connected", false);
+                    case "FAILED" -> updateStatus(platform + " failed: " + (detail == null ? "" : detail), false);
+                    case "DISCONNECTED" -> updateStatus(platform + " disconnected", false);
+                    case "RECONNECT_SCHEDULED" -> updateStatus(platform + " scheduled to reconnect", true);
+                    default -> {
+                        /* ignore */ }
+                }
             } catch (Exception ex) {
                 logger.debug("Failed to append system log: {}", ex.getMessage());
             }
@@ -893,9 +1020,10 @@ public class MainController implements Initializable {
         private final SimpleIntegerProperty retries;
         private final SimpleIntegerProperty backoffMs;
         private final String statusDetail;
+        private final javafx.beans.property.SimpleBooleanProperty enabled;
 
         public ConnectionRow(String platform, String user, PlatformStatus st,
-                com.voxstream.core.platform.PlatformConnectionManager.Metrics m) {
+                com.voxstream.core.platform.PlatformConnectionManager.Metrics m, boolean enabled) {
             this.platform = new SimpleStringProperty(platform);
             this.user = new SimpleStringProperty(user);
             this.status = new SimpleStringProperty(st.state().name());
@@ -905,6 +1033,22 @@ public class MainController implements Initializable {
             this.retries = new SimpleIntegerProperty((int) m.failedAttempts);
             this.backoffMs = new SimpleIntegerProperty(m.currentBackoffMs);
             this.statusDetail = st.detail();
+            this.enabled = new javafx.beans.property.SimpleBooleanProperty(enabled);
+            this.enabled.addListener((obs, oldV, newV) -> {
+                try {
+                    // FIX: previously used property object toString; now use value
+                    configurationServiceStatic.setDynamicBoolean("platform." + this.getPlatform() + ".enabled", newV);
+                } catch (Exception ex) {
+                    LoggerFactory.getLogger(MainController.class)
+                            .warn("Failed to persist enable flag for {}: {}", this.getPlatform(), ex.getMessage());
+                }
+            });
+        }
+
+        // Convenience constructor (default enabled=true) for legacy call sites
+        public ConnectionRow(String platform, String user, PlatformStatus st,
+                com.voxstream.core.platform.PlatformConnectionManager.Metrics m) {
+            this(platform, user, st, m, true);
         }
 
         public String getPlatform() {
@@ -929,6 +1073,10 @@ public class MainController implements Initializable {
 
         public int getBackoffMs() {
             return backoffMs.get();
+        }
+
+        public javafx.beans.property.SimpleBooleanProperty enabledProperty() {
+            return enabled;
         }
     }
 
@@ -964,6 +1112,14 @@ public class MainController implements Initializable {
         }
     }
 
+    // Static bridge for inner class config persistence
+    private static ConfigurationService configurationServiceStatic;
+
+    @Autowired
+    private void initStaticConfig(ConfigurationService svc) {
+        configurationServiceStatic = svc;
+    }
+
     @FXML
     private void handleRefreshConnections() {
         refreshConnections();
@@ -974,7 +1130,17 @@ public class MainController implements Initializable {
         ConnectionRow row = connectionsTable.getSelectionModel().getSelectedItem();
         if (row == null)
             return;
-        platformConnectionManager.connection(row.getPlatform()).ifPresent(c -> c.connect());
+        try {
+            platformConnectionManager.start();
+        } catch (Exception ignored) {
+        }
+        // Ensure platform initialized when using toolbar button
+        platformConnectionManager.ensurePlatformInitialized(row.getPlatform());
+        platformConnectionManager.connection(row.getPlatform()).ifPresent(c -> {
+            if ("twitch".equals(row.getPlatform()))
+                updateStatus("Opening Twitch OAuth (if required)...", true);
+            c.connect();
+        });
     }
 
     @FXML
@@ -999,8 +1165,13 @@ public class MainController implements Initializable {
     private void loadTwitchConfigFields() {
         if (twitchClientIdField != null)
             twitchClientIdField.setText(configurationService.get(CoreConfigKeys.TWITCH_CLIENT_ID));
-        if (twitchClientSecretField != null)
+        if (twitchClientSecretField != null) {
+            boolean pkce = Boolean.TRUE.equals(configurationService.get(CoreConfigKeys.TWITCH_OAUTH_PKCE_ENABLED)); // null-safe
+            if (pkce) {
+                twitchClientSecretField.setPromptText("(PKCE enabled - secret optional)");
+            }
             twitchClientSecretField.setText(configurationService.get(CoreConfigKeys.TWITCH_CLIENT_SECRET));
+        }
         if (twitchScopesField != null)
             twitchScopesField.setText(configurationService.get(CoreConfigKeys.TWITCH_SCOPES));
         if (twitchRedirectPortField != null)
@@ -1012,7 +1183,11 @@ public class MainController implements Initializable {
     private void handleSaveTwitchConfig() {
         try {
             configurationService.set(CoreConfigKeys.TWITCH_CLIENT_ID, twitchClientIdField.getText().trim());
-            configurationService.set(CoreConfigKeys.TWITCH_CLIENT_SECRET, twitchClientSecretField.getText().trim());
+            boolean pkce = Boolean.TRUE.equals(configurationService.get(CoreConfigKeys.TWITCH_OAUTH_PKCE_ENABLED)); // null-safe
+            String secret = twitchClientSecretField.getText().trim();
+            if (!pkce || !secret.isBlank()) { // only persist secret if PKCE disabled or user supplied a value
+                configurationService.set(CoreConfigKeys.TWITCH_CLIENT_SECRET, secret);
+            }
             configurationService.set(CoreConfigKeys.TWITCH_SCOPES, twitchScopesField.getText().trim());
             configurationService.set(CoreConfigKeys.TWITCH_REDIRECT_PORT,
                     Integer.parseInt(twitchRedirectPortField.getText().trim()));
@@ -1033,6 +1208,35 @@ public class MainController implements Initializable {
             refreshConnections();
         } catch (Exception ex) {
             twitchConfigStatusLabel.setText("Error: " + ex.getMessage());
+        }
+    }
+
+    private void initGlobalPlatformsToggle() {
+        if (globalPlatformsEnabledCheckbox == null)
+            return;
+        try {
+            boolean enabled = configurationService.get(CoreConfigKeys.PLATFORM_ENABLED);
+            globalPlatformsEnabledCheckbox.setSelected(enabled);
+            globalPlatformsEnabledCheckbox.selectedProperty().addListener((obs, oldV, newV) -> {
+                try {
+                    configurationService.set(CoreConfigKeys.PLATFORM_ENABLED, newV);
+                    updateStatus("Platform connections " + (newV ? "enabled" : "disabled"), false);
+                    if (newV) {
+                        try {
+                            platformConnectionManager.start();
+                        } catch (Exception ex) {
+                            logger.warn("Failed to start PlatformConnectionManager: {}", ex.toString());
+                        }
+                    } else {
+                        logger.info("Global platform disable set (new connections will not start until re-enabled)");
+                    }
+                    refreshConnections();
+                } catch (Exception ex) {
+                    logger.warn("Failed updating platform enabled flag: {}", ex.getMessage());
+                }
+            });
+        } catch (Exception e) {
+            logger.debug("Unable to init global platforms toggle: {}", e.getMessage());
         }
     }
 

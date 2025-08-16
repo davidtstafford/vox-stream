@@ -67,12 +67,13 @@ public class PlatformConnectionManager {
     }
 
     public void start() {
-        if (!started.compareAndSet(false, true))
-            return;
+        // Only proceed if global platform connections enabled
         if (!config.get(CoreConfigKeys.PLATFORM_ENABLED)) {
             log.info("Platform connections globally disabled");
-            return;
+            return; // do NOT flip started flag so a later enable can invoke start()
         }
+        if (!started.compareAndSet(false, true))
+            return; // already started
         log.info("PlatformConnectionManager starting (platforms={})", registry.platformIds());
         registry.platformIds().forEach(id -> {
             if (isPlatformEnabled(id)) {
@@ -85,16 +86,17 @@ public class PlatformConnectionManager {
     }
 
     private boolean isPlatformEnabled(String id) {
-        // Prefer explicit platform-specific key if present in CoreConfigKeys (e.g.
-        // twitch)
+        // Dynamic per-platform enable flag (new unified approach)
+        boolean dyn = config.getDynamicBoolean("platform." + id + ".enabled", false);
         if ("twitch".equals(id)) {
             try {
-                return config.get(CoreConfigKeys.TWITCH_ENABLED);
+                // Preserve legacy twitch.enabled key OR dynamic flag
+                return dyn || config.get(CoreConfigKeys.TWITCH_ENABLED);
             } catch (Exception ignored) {
+                return dyn; // fall back to dynamic only
             }
         }
-        // Fallback to dynamic key: platform.<id>.enabled (default=false)
-        return config.getDynamicBoolean("platform." + id + ".enabled", false);
+        return dyn; // non-special platforms use dynamic flag only
     }
 
     public void shutdown() {
@@ -261,6 +263,33 @@ public class PlatformConnectionManager {
 
     public java.util.Optional<com.voxstream.platform.api.PlatformConnection> connection(String platformId) {
         return java.util.Optional.ofNullable(states.get(platformId)).map(s -> s.connection);
+    }
+
+    public void ensurePlatformInitialized(String platformId) {
+        try {
+            // If manager not started yet but global flag now enabled, attempt start()
+            if (!started.get()) {
+                start();
+            }
+            if (!started.get())
+                return; // still not started (likely global disabled)
+            boolean enabled = isPlatformEnabled(platformId);
+            if (!enabled)
+                return; // do nothing if still disabled
+            if (!states.containsKey(platformId)) {
+                log.info("Initializing platform '{}' on-demand (post-start enable)", platformId);
+                initAndConnectAsync(platformId);
+            } else {
+                ConnState st = states.get(platformId);
+                PlatformStatus cur = st.lastStatus;
+                if (cur.state() == PlatformStatus.State.FAILED || cur.state() == PlatformStatus.State.DISCONNECTED) {
+                    log.info("Re-attempting connect for '{}' on-demand (current state={})", platformId, cur.state());
+                    attemptConnect(st, 0, config.get(CoreConfigKeys.PLATFORM_RECONNECT_INITIAL_DELAY_MS));
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Failed to ensure platform '{}' initialized: {}", platformId, e.getMessage());
+        }
     }
 
     public static record SummaryRow(String platformId, PlatformStatus.State state, boolean fatal, long connects,

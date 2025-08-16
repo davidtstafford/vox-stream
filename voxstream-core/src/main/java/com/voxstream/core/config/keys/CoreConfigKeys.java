@@ -98,7 +98,7 @@ public final class CoreConfigKeys {
             "twitch.enabled", Boolean.class, Boolean.FALSE, false,
             "Enable Twitch platform connection");
     public static final ConfigKey<String> TWITCH_CLIENT_ID = new ConfigKey<>(
-            "twitch.clientId", String.class, "", false,
+            "twitch.clientId", String.class, "72x8rzh0koyzgmn9j2i30qu54u3m1z", false,
             "Twitch application Client ID");
     public static final ConfigKey<String> TWITCH_CLIENT_SECRET = new ConfigKey<>(
             "twitch.clientSecret", String.class, "", true,
@@ -118,6 +118,9 @@ public final class CoreConfigKeys {
     public static final ConfigKey<Integer> TWITCH_EVENTSUB_HEARTBEAT_INTERVAL_SEC = new ConfigKey<>(
             "twitch.eventsub.heartbeat.intervalSec", Integer.class, 240, false,
             "Expected EventSub keepalive/heartbeat interval (seconds) used to detect stale WS sessions");
+    public static final ConfigKey<Boolean> TWITCH_OAUTH_PKCE_ENABLED = new ConfigKey<>(
+            "twitch.oauth.pkce.enabled", Boolean.class, Boolean.TRUE, false,
+            "Enable PKCE (no client secret required) for Twitch OAuth Authorization Code flow");
 
     // Registry of all keys for iteration / import-export (order preserved)
     private static final Map<String, ConfigKey<?>> REGISTRY;
@@ -147,6 +150,7 @@ public final class CoreConfigKeys {
         register(m, PLATFORM_STATUS_LOG_SUMMARY_INTERVAL_SEC);
         // Twitch keys (Phase 3.2)
         register(m, TWITCH_ENABLED);
+        register(m, TWITCH_OAUTH_PKCE_ENABLED);
         register(m, TWITCH_CLIENT_ID);
         register(m, TWITCH_CLIENT_SECRET);
         register(m, TWITCH_SCOPES);

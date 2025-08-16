@@ -40,12 +40,16 @@ public final class CompositeConfigValidators {
         Boolean twitchEnabled = get(values, CoreConfigKeys.TWITCH_ENABLED, Boolean.class);
         if (twitchEnabled != null && twitchEnabled) {
             String clientId = get(values, CoreConfigKeys.TWITCH_CLIENT_ID, String.class);
-            String clientSecret = get(values, CoreConfigKeys.TWITCH_CLIENT_SECRET, String.class);
+            Boolean pkce = get(values, CoreConfigKeys.TWITCH_OAUTH_PKCE_ENABLED, Boolean.class);
             if (clientId == null || clientId.isBlank()) {
                 throw new IllegalArgumentException("twitch.clientId required when twitch.enabled=true");
             }
-            if (clientSecret == null || clientSecret.isBlank()) {
-                throw new IllegalArgumentException("twitch.clientSecret required when twitch.enabled=true");
+            if (pkce == null || !pkce) { // only require secret if PKCE disabled
+                String clientSecret = get(values, CoreConfigKeys.TWITCH_CLIENT_SECRET, String.class);
+                if (clientSecret == null || clientSecret.isBlank()) {
+                    throw new IllegalArgumentException(
+                            "twitch.clientSecret required when twitch.enabled=true and PKCE disabled (set twitch.oauth.pkce.enabled=true to omit)");
+                }
             }
         }
         // Placeholder: future Twitch composite rules (e.g., required scopes vs enabled

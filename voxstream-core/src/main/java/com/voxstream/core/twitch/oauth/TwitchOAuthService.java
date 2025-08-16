@@ -9,8 +9,11 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -71,8 +74,11 @@ public class TwitchOAuthService {
         if (started)
             return;
         started = true;
-        if (!config.get(CoreConfigKeys.TWITCH_ENABLED)) {
-            log.info("Twitch disabled - OAuth service not started");
+        // Updated: honor dynamic enable flag OR legacy twitch.enabled key
+        boolean enabled = config.get(CoreConfigKeys.TWITCH_ENABLED)
+                || config.getDynamicBoolean("platform.twitch.enabled", false);
+        if (!enabled) {
+            log.info("Twitch disabled (static+dynamic false) - OAuth service not started");
             return;
         }
         cached = tokenDao.load().orElse(null);
@@ -86,7 +92,11 @@ public class TwitchOAuthService {
 
     /** Ensure we have a valid (non-expired) token, launching login if necessary. */
     public synchronized Optional<TwitchOAuthToken> ensureTokenInteractive() {
-        if (!config.get(CoreConfigKeys.TWITCH_ENABLED))
+        // Updated: allow either legacy static key or new dynamic enable flag to permit
+        // OAuth
+        boolean enabled = config.get(CoreConfigKeys.TWITCH_ENABLED)
+                || config.getDynamicBoolean("platform.twitch.enabled", false);
+        if (!enabled)
             return Optional.empty();
         // New: attempt lazy reload from DAO if cache empty (supports tests or external
         // seeding)
@@ -156,9 +166,14 @@ public class TwitchOAuthService {
             return; // test hook
         }
         String clientId = config.get(CoreConfigKeys.TWITCH_CLIENT_ID);
+        boolean pkceEnabled = Boolean.TRUE.equals(config.get(CoreConfigKeys.TWITCH_OAUTH_PKCE_ENABLED));
         String clientSecret = config.get(CoreConfigKeys.TWITCH_CLIENT_SECRET);
-        if (clientId.isBlank() || clientSecret.isBlank()) {
-            log.warn("Cannot start Twitch OAuth login - clientId/secret missing");
+        if (clientId.isBlank()) {
+            log.warn("Cannot start Twitch OAuth login - clientId missing");
+            return;
+        }
+        if (!pkceEnabled && clientSecret.isBlank()) {
+            log.warn("Cannot start Twitch OAuth login - clientSecret required when PKCE disabled");
             return;
         }
         int port = config.get(CoreConfigKeys.TWITCH_REDIRECT_PORT);
@@ -166,12 +181,28 @@ public class TwitchOAuthService {
         String scopesJoined = config.get(CoreConfigKeys.TWITCH_SCOPES);
         String scopeParam = encode(scopesJoined.replace(',', ' ')).replace("+", "%20");
         String redirectUri = "http://localhost:" + port + "/callback"; // loopback HTTP
+        // PKCE generation (RFC 7636 - S256)
+        String codeVerifier = null;
+        String codeChallenge = null;
+        if (pkceEnabled) {
+            codeVerifier = generateCodeVerifier();
+            codeChallenge = deriveCodeChallenge(codeVerifier);
+        }
         // Use idBase for auth URL (strip possible trailing /)
         String base = idBase.endsWith("/") ? idBase.substring(0, idBase.length() - 1) : idBase;
-        String authUrl = base + "/oauth2/authorize?response_type=code&client_id=" + encode(clientId)
-                + "&redirect_uri=" + encode(redirectUri) + "&scope=" + scopeParam + "&state=" + state;
-        log.info("Open this URL in a browser to authorize Twitch: {}", authUrl);
-        startLoopbackServer(port, state, redirectUri, clientId, clientSecret);
+        StringBuilder authUrlB = new StringBuilder(base)
+                .append("/oauth2/authorize?response_type=code&client_id=").append(encode(clientId))
+                .append("&redirect_uri=").append(encode(redirectUri))
+                .append("&scope=").append(scopeParam)
+                .append("&state=").append(state);
+        if (pkceEnabled) {
+            authUrlB.append("&code_challenge=").append(encode(codeChallenge))
+                    .append("&code_challenge_method=S256");
+        }
+        String authUrl = authUrlB.toString();
+        log.info("Open this URL in a browser to authorize Twitch (PKCE={}): {}", pkceEnabled, authUrl);
+        startLoopbackServer(port, state, redirectUri, clientId, pkceEnabled ? null : clientSecret, codeVerifier,
+                pkceEnabled);
         try {
             java.awt.Desktop d = java.awt.Desktop.isDesktopSupported() ? java.awt.Desktop.getDesktop() : null;
             if (d != null && d.isSupported(java.awt.Desktop.Action.BROWSE)) {
@@ -182,7 +213,7 @@ public class TwitchOAuthService {
     }
 
     private void startLoopbackServer(int port, String expectedState, String redirectUri, String clientId,
-            String clientSecret) {
+            String clientSecretOrNull, String codeVerifier, boolean pkceEnabled) {
         try {
             HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
             server.createContext("/callback", new HttpHandler() {
@@ -201,7 +232,8 @@ public class TwitchOAuthService {
                         } else {
                             String code = params.get("code");
                             try {
-                                exchangeCodeForToken(code, redirectUri, clientId, clientSecret);
+                                exchangeCodeForToken(code, redirectUri, clientId, clientSecretOrNull, codeVerifier,
+                                        pkceEnabled);
                                 responseMsg = "Twitch authorization complete. You may close this window.";
                             } catch (Exception e) {
                                 log.error("Token exchange failed", e);
@@ -223,10 +255,20 @@ public class TwitchOAuthService {
         }
     }
 
-    private void exchangeCodeForToken(String code, String redirectUri, String clientId, String clientSecret)
+    private void exchangeCodeForToken(String code, String redirectUri, String clientId, String clientSecretOrNull,
+            String codeVerifier, boolean pkceEnabled)
             throws Exception {
-        String body = "client_id=" + encode(clientId) + "&client_secret=" + encode(clientSecret)
-                + "&code=" + encode(code) + "&grant_type=authorization_code&redirect_uri=" + encode(redirectUri);
+        StringBuilder bodyB = new StringBuilder()
+                .append("client_id=").append(encode(clientId))
+                .append("&code=").append(encode(code))
+                .append("&grant_type=authorization_code")
+                .append("&redirect_uri=").append(encode(redirectUri));
+        if (pkceEnabled) {
+            bodyB.append("&code_verifier=").append(encode(codeVerifier));
+        } else {
+            bodyB.append("&client_secret=").append(encode(clientSecretOrNull));
+        }
+        String body = bodyB.toString();
         String base = idBase.endsWith("/") ? idBase.substring(0, idBase.length() - 1) : idBase;
         HttpRequest req = HttpRequest.newBuilder()
                 .uri(URI.create(base + "/oauth2/token"))
@@ -251,7 +293,7 @@ public class TwitchOAuthService {
                 null, Instant.now());
         tokenDao.save(tok);
         cached = tok;
-        log.info("Twitch OAuth token stored (scopes={} expiresIn={}s)", scopes, expiresIn);
+        log.info("Twitch OAuth token stored (scopes={} expiresIn={}s pkce={})", scopes, expiresIn, pkceEnabled);
         // Populate user id/login & adjust expiry using validate endpoint
         validateAndAugmentToken();
     }
@@ -260,12 +302,19 @@ public class TwitchOAuthService {
         if (cached == null)
             return;
         String clientId = config.get(CoreConfigKeys.TWITCH_CLIENT_ID);
+        boolean pkceEnabled = Boolean.TRUE.equals(config.get(CoreConfigKeys.TWITCH_OAUTH_PKCE_ENABLED));
         String clientSecret = config.get(CoreConfigKeys.TWITCH_CLIENT_SECRET);
-        if (clientId.isBlank() || clientSecret.isBlank())
+        if (clientId.isBlank())
             return;
-        String body = "grant_type=refresh_token&refresh_token=" + encode(cached.getRefreshToken()) + "&client_id="
-                + encode(clientId)
-                + "&client_secret=" + encode(clientSecret);
+        if (!pkceEnabled && clientSecret.isBlank())
+            return; // secret required when PKCE disabled
+        StringBuilder bodyB = new StringBuilder()
+                .append("grant_type=refresh_token&refresh_token=").append(encode(cached.getRefreshToken()))
+                .append("&client_id=").append(encode(clientId));
+        if (!pkceEnabled) {
+            bodyB.append("&client_secret=").append(encode(clientSecret));
+        }
+        String body = bodyB.toString();
         String base = idBase.endsWith("/") ? idBase.substring(0, idBase.length() - 1) : idBase;
         HttpRequest req = HttpRequest.newBuilder()
                 .uri(URI.create(base + "/oauth2/token"))
@@ -301,7 +350,7 @@ public class TwitchOAuthService {
                 cached = new TwitchOAuthToken(access, refresh, scopes, Instant.now().plusSeconds(expiresIn),
                         cached.getUserId(), cached.getLogin(), Instant.now());
                 tokenDao.save(cached);
-                log.info("Twitch token refreshed; expires in {}s", expiresIn);
+                log.info("Twitch token refreshed; expires in {}s (pkce={})", expiresIn, pkceEnabled);
                 notifyTokenListeners();
                 // Augment with validation call (async)
                 scheduler.execute(() -> {
@@ -461,6 +510,27 @@ public class TwitchOAuthService {
                 log.debug("Failed to delete stored Twitch token: {}", e.toString());
             }
             notifyTokenListeners();
+        }
+    }
+
+    // --- PKCE helper methods ---
+    private static final SecureRandom PKCE_RANDOM = new SecureRandom();
+
+    private static String generateCodeVerifier() {
+        byte[] bytes = new byte[64]; // 64 bytes -> ~86 char base64url (43-128 allowed)
+        PKCE_RANDOM.nextBytes(bytes);
+        String s = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+        // Ensure only allowed chars (base64url already uses A-Z a-z 0-9 - _)
+        return s;
+    }
+
+    private static String deriveCodeChallenge(String verifier) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] digest = md.digest(verifier.getBytes(StandardCharsets.US_ASCII));
+            return Base64.getUrlEncoder().withoutPadding().encodeToString(digest);
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to compute PKCE code challenge", e);
         }
     }
 }

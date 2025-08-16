@@ -41,76 +41,95 @@
                            <children>
                               <Label style="-fx-font-size: 24px; -fx-font-weight: bold;" text="Platform Connections" />
                               <Label text="Configure and monitor your platform connections." />
+                              <!-- Global enable toggle -->
                               <HBox spacing="10.0">
                                 <children>
-                                  <Button fx:id="connectSelectedButton" text="Connect" onAction="#handleConnectSelected" />
-                                  <Button fx:id="disconnectSelectedButton" text="Disconnect" onAction="#handleDisconnectSelected" />
-                                  <Button fx:id="reconnectSelectedButton" text="Force Reconnect" onAction="#handleReconnectSelected" />
-                                  <Button fx:id="refreshConnectionsButton" text="Refresh" onAction="#handleRefreshConnections" />
+                                  <CheckBox fx:id="globalPlatformsEnabledCheckbox" text="Enable Platform Connections" />
+                                  <Label text="(Toggle to start/stop manager)" />
                                 </children>
                               </HBox>
-                              <TableView fx:id="connectionsTable" prefHeight="260.0" prefWidth="900.0">
+                              <HBox spacing="10.0">
+                                <children>
+                                  <Label text="Selected Connection:" />
+                                  <Button fx:id="connectSelectedButton" text="Connect Selected" onAction="#handleConnectSelected" disable="true" />
+                                  <Button fx:id="disconnectSelectedButton" text="Disconnect Selected" onAction="#handleDisconnectSelected" disable="true" />
+                                  <Button fx:id="reconnectSelectedButton" text="Reconnect Selected" onAction="#handleReconnectSelected" disable="true" />
+                                  <Button fx:id="refreshConnectionsButton" text="Refresh Table" onAction="#handleRefreshConnections" />
+                                </children>
+                              </HBox>
+                              <TableView fx:id="connectionsTable" prefHeight="260.0" prefWidth="1020.0">
                                 <columns>
+                                  <TableColumn fx:id="enabledCol" prefWidth="80.0" text="Enabled" />
                                   <TableColumn fx:id="platformCol" prefWidth="120.0" text="Platform" />
                                   <TableColumn fx:id="userCol" prefWidth="160.0" text="User" />
                                   <TableColumn fx:id="statusCol" prefWidth="120.0" text="Status" />
                                   <TableColumn fx:id="sinceCol" prefWidth="160.0" text="Connected Since" />
                                   <TableColumn fx:id="retriesCol" prefWidth="90.0" text="Retries" />
                                   <TableColumn fx:id="backoffCol" prefWidth="110.0" text="Backoff (ms)" />
-                                  <TableColumn fx:id="actionsCol" prefWidth="260.0" text="Actions" />
+                                  <TableColumn fx:id="actionsCol" prefWidth="380.0" text="Actions" />
                                 </columns>
                               </TableView>
-                              <TitledPane text="Twitch Credentials" expanded="false">
+                              <TitledPane fx:id="platformConfigPane" text="Selected Platform Configuration" expanded="false">
                                 <content>
-                                  <VBox spacing="8.0" padding="10.0">
+                                  <VBox spacing="10.0">
+                                    <padding><Insets top="10" right="10" bottom="10" left="10" /></padding>
                                     <children>
-                                      <HBox spacing="6.0">
+                                      <Label fx:id="selectedPlatformHeader" style="-fx-font-weight: bold;" text="No platform selected" />
+                                      <VBox fx:id="twitchConfigBox" spacing="8.0" visible="false" managed="false">
                                         <children>
-                                          <Label text="Client ID:" />
-                                          <TextField fx:id="twitchClientIdField" promptText="Enter Client ID" prefWidth="260.0" />
+                                          <HBox spacing="6.0">
+                                            <children>
+                                              <Label text="Client ID:" />
+                                              <TextField fx:id="twitchClientIdField" promptText="Enter Client ID" prefWidth="260.0" />
+                                            </children>
+                                          </HBox>
+                                          <HBox spacing="6.0">
+                                            <children>
+                                              <Label text="Client Secret:" />
+                                              <PasswordField fx:id="twitchClientSecretField" promptText="Enter Client Secret" prefWidth="260.0" />
+                                            </children>
+                                          </HBox>
+                                          <HBox spacing="6.0">
+                                            <children>
+                                              <Label text="Scopes (comma):" />
+                                              <TextField fx:id="twitchScopesField" promptText="user:read:email,channel:read:subscriptions" prefWidth="320.0" />
+                                            </children>
+                                          </HBox>
+                                          <HBox spacing="8.0">
+                                            <children>
+                                              <Label text="Redirect Port:" />
+                                              <TextField fx:id="twitchRedirectPortField" promptText="3300" prefWidth="80.0" />
+                                              <Button text="Save" onAction="#handleSaveTwitchConfig" />
+                                              <Button text="Sign Out" onAction="#handleTwitchSignOut" />
+                                            </children>
+                                          </HBox>
+                                          <Label fx:id="twitchConfigStatusLabel" textFill="GRAY" text="" />
                                         </children>
-                                      </HBox>
-                                      <HBox spacing="6.0">
-                                        <children>
-                                          <Label text="Client Secret:" />
-                                          <PasswordField fx:id="twitchClientSecretField" promptText="Enter Client Secret" prefWidth="260.0" />
-                                        </children>
-                                      </HBox>
-                                      <HBox spacing="6.0">
-                                        <children>
-                                          <Label text="Scopes (comma):" />
-                                          <TextField fx:id="twitchScopesField" promptText="user:read:email,channel:read:subscriptions" prefWidth="320.0" />
-                                        </children>
-                                      </HBox>
-                                      <HBox spacing="8.0">
-                                        <children>
-                                          <Label text="Redirect Port:" />
-                                          <TextField fx:id="twitchRedirectPortField" promptText="3300" prefWidth="80.0" />
-                                          <Button text="Save Twitch Config" onAction="#handleSaveTwitchConfig" />
-                                          <Button text="Sign Out" onAction="#handleTwitchSignOut" />
-                                        </children>
-                                      </HBox>
-                                      <Label fx:id="twitchConfigStatusLabel" textFill="GRAY" text="" />
+                                      </VBox>
+                                      <Label fx:id="noConfigPlaceholder" text="No configurable settings for this platform yet." />
                                     </children>
                                   </VBox>
                                 </content>
                               </TitledPane>
                               <TitledPane text="Connection Status Log" expanded="true">
                                 <content>
-                                  <VBox spacing="6.0" padding="8.0">
+                                  <VBox spacing="6.0">
+                                    <padding><Insets top="8" right="8" bottom="8" left="8" /></padding>
                                     <children>
                                       <HBox spacing="8.0">
                                         <children>
                                           <Label text="Recent platform status transitions (auto-trim to 200 entries)." />
                                           <Button text="Clear" onAction="#handleClearSystemLog" />
+                                          <Label text="Filter:" />
+                                          <ComboBox fx:id="logFilterCombo" prefWidth="140.0" promptText="All" />
                                         </children>
                                       </HBox>
-                                      <TableView fx:id="systemLogTable" prefHeight="220.0" prefWidth="900.0">
+                                      <TableView fx:id="systemLogTable" prefHeight="220.0" prefWidth="980.0">
                                         <columns>
                                           <TableColumn fx:id="logTimeCol" prefWidth="170.0" text="Time" />
                                           <TableColumn fx:id="logPlatformCol" prefWidth="120.0" text="Platform" />
                                           <TableColumn fx:id="logStateCol" prefWidth="140.0" text="State" />
-                                          <TableColumn fx:id="logDetailCol" prefWidth="440.0" text="Detail" />
+                                          <TableColumn fx:id="logDetailCol" prefWidth="520.0" text="Detail" />
                                         </columns>
                                       </TableView>
                                     </children>
